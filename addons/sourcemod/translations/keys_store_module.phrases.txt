@@ -1,0 +1,21 @@
+"Phrases"
+{
+	"ERROR_INVALID_CREDITS"
+	{
+		"ru"	"ОШИБКА: Неверное количество кредитов!"
+		"en"	"ERROR: Wrong number of credits!"
+	}
+
+	"CREDITS"
+	{
+		"ru"	"Кредиты"
+		"en"	"Credits"
+	}
+
+	"YOU_RECEIVED_CREDITS"
+	{
+		"#format"	"{1:d}"
+		"ru"	"[KEYS][Store] Вы получили {1} кредитов!"
+		"en"	"[KEYS][Store] You received  {1} credits!"
+	}
+}

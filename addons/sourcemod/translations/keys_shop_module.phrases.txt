@@ -1,0 +1,71 @@
+"Phrases"
+{
+	"ERROR_INVALID_CREDITS"
+	{
+		"ru"	"ОШИБКА: Неверное количество кредитов!"
+		"en"	"ERROR: Wrong number of credits!"
+	}
+
+	"ERROR_INVALID_CATEGORY"
+	{
+		"ru"	"ОШИБКА: Неверная категория!"
+		"en"	"ERROR: Invalid category!"
+	}
+
+	"ERROR_INVALID_ITEM"
+	{
+		"ru"	"ОШИБКА: Неверный предмет!"
+		"en"	"ERROR: Wrong subject!"
+	}
+
+	"CREDITS"
+	{
+		"ru"	"Кредиты"
+		"en"	"Credits"
+	}
+
+	"CATEGORY"
+	{
+		"ru"	"Категория"
+		"en"	"Category"
+	}
+
+	"ITEM"
+	{
+		"ru"	"Предмет"
+		"en"	"Subject"
+	}
+
+	"ALL"
+	{
+		"ru"	"Все"
+		"en"	"All"
+	}
+
+	"CHAT_PREFIX"
+	{
+		"ru"	"[KEYS][Shop] "
+		"en"	"[KEYS][Shop] "
+	}
+
+	"YOU_RECEIVED_CREDITS"
+	{
+		"#format"	"{1:d}"
+		"ru"	"Вы получили {1} кредитов!"
+		"en"	"You received  {1} credits!"
+	}
+
+	"YOU_RECEIVED_ITEM_FROM_CATEGORY"
+	{
+		"#format"	"{1:s},{2:s}"
+		"ru"	"Вы получили {1} из категории {2}!"
+		"en"	"You received {1} from the category {2}!"
+	}
+
+	"YOU_RECEIVED_ALL_ITEMS_FROM_CATEGORY"
+	{
+		"#format"	"{1:s}"
+		"ru"	"Вы получили Все предметы из категории {1}!"
+		"en"	"You received All items from the category {1}!"
+	}
+}
