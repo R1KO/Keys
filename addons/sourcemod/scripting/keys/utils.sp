@@ -106,6 +106,10 @@ UTIL_GetCharTemplate(iChar)
 	case 0x42:	return UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]);
 		// X - число 0-9 либо буква в любом регистре
 	case 0x58:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):(GetRandomInt(1, 20) > 10 ? UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]));
+		// U - число 0-9 либо буква в верхнем регистре
+	case 0x55:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]);
+		// L - число 0-9 либо буква в нижнем регистре
+	case 0x4c:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]);
 		// Другой символ
 	default:	return iChar;
 	}
