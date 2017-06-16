@@ -2,8 +2,8 @@
 {
 	"ERROR_INVALID_CREDITS"
 	{
-		"ru"	"ОШИБКА: Неверное количество кредитов!"
-		"en"	"ERROR: Wrong number of credits!"
+		"ru"	"Неверное количество кредитов!"
+		"en"	"Wrong number of credits!"
 	}
 
 	"CREDITS"
