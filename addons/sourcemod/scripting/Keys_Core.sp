@@ -7,7 +7,7 @@ public Plugin:myinfo =
 {
 	name		= "[Keys] Core",
 	author	= "R1KO",
-	version	= "1.1",
+	version	= "1.4",
 	url		= "hlmod.ru"
 };
 
@@ -21,6 +21,7 @@ public OnPluginStart()
 	LoadTranslations("keys_core.phrases");
 
 	g_bIsStarted = false;
+	g_iServerID = 0;
 
 	BuildPath(Path_SM, SZF(g_sLogFile), "logs/Keys.log");
 
@@ -48,7 +49,7 @@ public OnPluginStart()
 	HookConVarChange(hCvar, OnAttemptsChange);
 	g_CVAR_iAttempts = GetConVarInt(hCvar);
 
-	hCvar = CreateConVar("key_block_time", "3600", "На сколько минут будет заблокирован игрок при вводе неверных ключей", _, true, 1.0);
+	hCvar = CreateConVar("key_block_time", "60", "На сколько минут будет заблокирован игрок при вводе неверных ключей", _, true, 1.0);
 	HookConVarChange(hCvar, OnBlockTimeChange);
 	g_CVAR_iBlockTime = GetConVarInt(hCvar);
 
@@ -64,7 +65,7 @@ public OnKeyTemplateChange(Handle:hCvar, const String:oldValue[], const String:n
 public OnServerIDChange(Handle:hCvar, const String:oldValue[], const String:newValue[])
 {
 	g_CVAR_iServerID = GetConVarInt(hCvar);
-	if(g_bIsStarted && g_bDBMySQL)
+	if(g_bDBMySQL && g_bIsStarted)
 	{
 		GetServerID(false);
 	}
@@ -120,65 +121,74 @@ public DB_OnConnect(Handle:owner, Handle:hndl, const String:sError[], any:data)
 
 CreateTables()
 {
-	SQL_LockDatabase(g_hDatabase);
+	new Handle:hTxn = SQL_CreateTransaction();
+
 	if (g_bDBMySQL)
 	{
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `table_keys` (\
+								`key_name` VARCHAR(64) NOT NULL, \
+								`type` VARCHAR(64) NOT NULL, \
+								`expires` INTEGER UNSIGNED NOT NULL default 0, \
+								`uses` INTEGER UNSIGNED NOT NULL default 1, \
+								`sid` INTEGER NOT NULL, \
+								`param1` VARCHAR(64) NULL default NULL, \
+								`param2` VARCHAR(64) NULL default NULL, \
+								`param3` VARCHAR(64) NULL default NULL, \
+								`param4` VARCHAR(64) NULL default NULL, \
+								`param5` VARCHAR(64) NULL default NULL, \
+								PRIMARY KEY(`key_name`)) DEFAULT CHARSET=utf8;");
+
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `keys_blocked_players` (\
+								`auth` VARCHAR(24) NOT NULL, \
+								`block_end` INTEGER UNSIGNED NOT NULL, \
+								`sid` INTEGER NOT NULL, \
+								PRIMARY KEY(`auth`)) DEFAULT CHARSET=utf8;");
+
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `keys_players_used` (\
+								`auth` VARCHAR(24) NOT NULL, \
+								`key_name` VARCHAR(64) NOT NULL, \
+								`sid` INTEGER NOT NULL) DEFAULT CHARSET=utf8;");
+
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `keys_servers` (\
+								`sid` INTEGER NOT NULL AUTO_INCREMENT,\
+								`address` VARCHAR(24) NOT NULL, \
+								PRIMARY KEY(`sid`), \
+								UNIQUE KEY `address` (`address`)) DEFAULT CHARSET=utf8;");
 		g_iServerID = -1;
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `table_keys` (\
-																		`key_name` VARCHAR(64) NOT NULL, \
-																		`type` VARCHAR(64) NOT NULL, \
-																		`expires` INTEGER UNSIGNED NOT NULL default 0, \
-																		`uses` INTEGER UNSIGNED NOT NULL default 1, \
-																		`sid` INTEGER NOT NULL, \
-																		`param1` VARCHAR(64) NULL default NULL, \
-																		`param2` VARCHAR(64) NULL default NULL, \
-																		`param3` VARCHAR(64) NULL default NULL, \
-																		`param4` VARCHAR(64) NULL default NULL, \
-																		`param5` VARCHAR(64) NULL default NULL, \
-																		PRIMARY KEY(`key_name`)) DEFAULT CHARSET=utf8;");
-
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `keys_blocked_players` (\
-																		`auth` VARCHAR(24) NOT NULL, \
-																		`block_end` INTEGER UNSIGNED NOT NULL, \
-																		`sid` INTEGER NOT NULL, \
-																		PRIMARY KEY(`auth`)) DEFAULT CHARSET=utf8;");
-
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `keys_players_used` (\
-																		`auth` VARCHAR(24) NOT NULL, \
-																		`key_name` VARCHAR(64) NOT NULL, \
-																		`sid` INTEGER NOT NULL) DEFAULT CHARSET=utf8;");
-
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `keys_servers` (\
-																		`sid` INTEGER NOT NULL AUTO_INCREMENT,\
-																		`address` VARCHAR(24) NOT NULL, \
-																		PRIMARY KEY(`sid`), \
-																		UNIQUE KEY `address` (`address`)) DEFAULT CHARSET=utf8;");
 	}
 	else
 	{
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `table_keys` (\
+								`key_name` VARCHAR(64) NOT NULL PRIMARY KEY, \
+								`type` VARCHAR(64) NOT NULL, \
+								`expires` INTEGER UNSIGNED NOT NULL default 0, \
+								`uses` INTEGER UNSIGNED NOT NULL default 1, \
+								`param1` VARCHAR(64) NULL default NULL, \
+								`param2` VARCHAR(64) NULL default NULL, \
+								`param3` VARCHAR(64) NULL default NULL, \
+								`param4` VARCHAR(64) NULL default NULL, \
+								`param5` VARCHAR(64) NULL default NULL);");
+
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `keys_blocked_players` (\
+								`auth` VARCHAR(24) NOT NULL PRIMARY KEY, \
+								`block_end` INTEGER UNSIGNED NOT NULL);");
+
+		SQL_AddQuery(hTxn, "CREATE TABLE IF NOT EXISTS `keys_players_used` (\
+								`auth` VARCHAR(24) NOT NULL, \
+								`key_name` VARCHAR(64) NOT NULL);");
 		g_iServerID = 0;
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `table_keys` (\
-																		`key_name` VARCHAR(64) NOT NULL PRIMARY KEY, \
-																		`type` VARCHAR(64) NOT NULL, \
-																		`expires` INTEGER UNSIGNED NOT NULL default 0, \
-																		`uses` INTEGER UNSIGNED NOT NULL default 1, \
-																		`param1` VARCHAR(64) NULL default NULL, \
-																		`param2` VARCHAR(64) NULL default NULL, \
-																		`param3` VARCHAR(64) NULL default NULL, \
-																		`param4` VARCHAR(64) NULL default NULL, \
-																		`param5` VARCHAR(64) NULL default NULL);");
-
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `keys_blocked_players` (\
-																		`auth` VARCHAR(24) NOT NULL PRIMARY KEY, \
-																		`block_end` INTEGER UNSIGNED NOT NULL);");
-
-		SQL_TQuery(g_hDatabase, SQL_Callback_ErrorCheck,	"CREATE TABLE IF NOT EXISTS `keys_players_used` (\
-																		`auth` VARCHAR(24) NOT NULL, \
-																		`key_name` VARCHAR(64) NOT NULL);");
 	}
 
-	SQL_UnlockDatabase(g_hDatabase);
+	SQL_ExecuteTransaction(g_hDatabase, hTxn, SQL_Callback_TxnSuccess, SQL_Callback_TxnFailure, 0, DBPrio_High);
+}
 
+public SQL_Callback_TxnFailure(Handle:hDB, any:data, iNumQueries, const String:sError[], iFailIndex, any:queryData[])
+{
+	SetFailState("Не удалось создать таблицу (%i): %s", iFailIndex, sError);
+}
+
+public SQL_Callback_TxnSuccess(Handle:hDB, any:data, iNumQueries, Handle:hResults[], any:queryData[])
+{
 	if(g_bDBMySQL && g_iServerID == -1)
 	{
 		GetServerID(true);
@@ -193,13 +203,15 @@ Notify_Started()
 	g_bIsStarted = true;
 
 	CreateForward_OnCoreStarted();
+
+	DeleteExpiredKeys();
 }
 
 public OnConfigsExecuted()
 {
 	if(g_bIsStarted)
 	{
-		GetServerID(false);
+		DeleteExpiredKeys();
 	}
 }
 
@@ -248,8 +260,6 @@ GetServerID(bool:bNotifyStarted)
 
 	if(bNotifyStarted)
 	{
-		DeleteExpiredKeys();
-	
 		Notify_Started();
 	}
 }
@@ -268,8 +278,6 @@ public SQL_Callback_SelectServerID(Handle:hOwner, Handle:hResult, const String:s
 
 		if(bNotifyStarted)
 		{
-			DeleteExpiredKeys();
-
 			Notify_Started();
 		}
 		return;
@@ -295,8 +303,6 @@ public SQL_Callback_CreateServerID(Handle:hOwner, Handle:hResult, const String:s
 
 		if(bNotifyStarted)
 		{
-			DeleteExpiredKeys();
-
 			Notify_Started();
 		}
 	}
