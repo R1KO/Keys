@@ -2,20 +2,20 @@
 {
 	"ERROR_INVALID_CREDITS"
 	{
-		"ru"	"ОШИБКА: Неверное количество кредитов!"
-		"en"	"ERROR: Wrong number of credits!"
+		"ru"	"Неверное количество кредитов!"
+		"en"	"Wrong number of credits!"
 	}
 
 	"ERROR_INVALID_CATEGORY"
 	{
-		"ru"	"ОШИБКА: Неверная категория!"
-		"en"	"ERROR: Invalid category!"
+		"ru"	"Неверная категория!"
+		"en"	"Invalid category!"
 	}
 
 	"ERROR_INVALID_ITEM"
 	{
-		"ru"	"ОШИБКА: Неверный предмет!"
-		"en"	"ERROR: Wrong subject!"
+		"ru"	"Неверный предмет!"
+		"en"	"Wrong subject!"
 	}
 
 	"CREDITS"

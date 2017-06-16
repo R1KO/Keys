@@ -30,10 +30,16 @@
 		"en"	"Player {1} ({2}) used the key {3}"
 	}
 
+	"ERROR"
+	{
+		"ru"	"ОШИБКА: "
+		"en"	"ERROR: "
+	}
+
 	"ERROR_KEY_NOT_EXIST"
 	{
-		"ru"	"ОШИБКА: Ключ не существует!"
-		"en"	"ERROR: The key does not exist!"
+		"ru"	"Ключ не существует!"
+		"en"	"The key does not exist!"
 		"fi"	"Avain ei ole olemassa!"
 	}
 
@@ -45,65 +51,65 @@
 
 	"ERROR_NUM_ARGS"
 	{
-		"ru"	"ОШИБКА: Неверное количество аргументов!"
-		"en"	"ERROR: Wrong number of arguments!"
+		"ru"	"Неверное количество аргументов!"
+		"en"	"Wrong number of arguments!"
 	}
 
 	"ERROR_INCORRECT_TYPE"
 	{
-		"ru"	"ОШИБКА: Неверный тип ключа!"
-		"en"	"ERROR: Invalid key type!"
+		"ru"	"Неверный тип ключа!"
+		"en"	"Invalid key type!"
 	}
 
 	"ERROR_KEY_ALREADY_EXISTS"
 	{
 		"#format"	"{1:s}"
-		"ru"	"ОШИБКА: Ключ {1} уже существует!"
-		"en"	"ERROR: Key {1} already exists!"
+		"ru"	"Ключ {1} уже существует!"
+		"en"	"Key {1} already exists!"
 	}
 
 	"ERROR_INCORRECT_KEY"
 	{
-		"ru"	"ОШИБКА: Некорректный ключ!"
-		"en"	"ERROR: Incorrect key!"
+		"ru"	"Некорректный ключ!"
+		"en"	"Incorrect key!"
 	}
 
 	"ERROR_INCORRECT_TIME"
 	{
-		"ru"	"ОШИБКА: Неверное время!"
-		"en"	"ERROR: Incorrect time!"
+		"ru"	"Неверное время!"
+		"en"	"Incorrect time!"
 		"fi"	"VIRHE: Väärä aika!"
 	}
 
 	"ERROR_INCORRECT_AMOUNT"
 	{
-		"ru"	"ОШИБКА: Неверное количество!"
-		"en"	"ERROR: Incorrect amount!"
+		"ru"	"Неверное количество!"
+		"en"	"Incorrect amount!"
 		"fi"	"VIRHE: Väärä määrä!"
 	}
 
 	"ERROR_KEY_EMPTY"
 	{
-		"ru"	"ОШИБКА: Ключ пустой!"
-		"en"	"ERROR: The key is empty!"
+		"ru"	"Ключ пустой!"
+		"en"	"The key is empty!"
 	}
 
 	"ERROR_KEY_SHORT"
 	{
-		"ru"	"ОШИБКА: Ключ слишком короткий!"
-		"en"	"ERROR: The key is too short!"
+		"ru"	"Ключ слишком короткий!"
+		"en"	"The key is too short!"
 	}
 
 	"ERROR_KEY_LONG"
 	{
-		"ru"	"ОШИБКА: Ключ слишком длинный!"
-		"en"	"ERROR: The key is too long!"
+		"ru"	"Ключ слишком длинный!"
+		"en"	"The key is too long!"
 	}
 
 	"ERROR_KEY_INVALID_CHARACTERS"
 	{
-		"ru"	"ОШИБКА: Ключ содержит запрещенные символы!"
-		"en"	"ERROR: The key contains illegal characters!"
+		"ru"	"Ключ содержит запрещенные символы!"
+		"en"	"The key contains illegal characters!"
 	}
 
 	"SUCCESS_CREATE_KEY"

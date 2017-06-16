@@ -77,6 +77,6 @@ public Native_UnregKey(Handle:hPlugin, iNumParams)
 		{
 			CloseHandle(hDataPack);
 		}
-		RemoveFromTrie(g_hKeysArray, sKeyType);
+		RemoveFromTrie(g_hKeysTrie, sKeyType);
 	}
 }

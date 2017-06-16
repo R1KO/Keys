@@ -105,3 +105,17 @@ public SharedPlugin:__pl_keys_core=
 	required = 0
 #endif
 };
+
+#if !defined REQUIRE_PLUGIN
+<<<<<<< HEAD
+public void __pl_keys_core_SetNTVOptional()
+=======
+public __pl_keys_core_SetNTVOptional()
+>>>>>>> 4ee67050d3fb25df6e30b26e03301ee38d46b425
+{
+	MarkNativeAsOptional("Keys_IsCoreStarted");
+	MarkNativeAsOptional("Keys_GetCoreDatabase");
+	MarkNativeAsOptional("Keys_RegKey");
+	MarkNativeAsOptional("Keys_UnregKey");
+}
+#endif

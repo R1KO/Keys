@@ -47,7 +47,7 @@ public Action:UseKey_CMD(iClient, iArgs)
 		{
 			if(g_iAttempts[iClient] > GetTime())
 			{
-				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_BLOCKED");
+				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_BLOCKED");
 				return Plugin_Handled;
 				
 			}
@@ -61,7 +61,7 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 		if(iArgs != 1)
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "USAGE_ERROR_USE_KEY");
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "USAGE_ERROR_USE_KEY");
 			return Plugin_Handled;
 		}
 
@@ -70,22 +70,22 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 		if(!UTIL_ValidateKey(sKey, strlen(sKey), SZF(sQuery)))
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", sQuery);
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", sQuery);
 
 			if(g_CVAR_iAttempts)
 			{
 				if(g_iAttempts[iClient]++ >= g_CVAR_iAttempts)
 				{
 					BlockClient(iClient);
-					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_BLOCKED");
+					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_BLOCKED");
 					return Plugin_Handled;
 				}
 
-				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_KEY_LEFT", g_CVAR_iAttempts-g_iAttempts[iClient]);
+				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_KEY_LEFT", g_CVAR_iAttempts-g_iAttempts[iClient]);
 			}
 			else
 			{
-				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_KEY");
+				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_KEY");
 			}
 
 			return Plugin_Handled;
@@ -151,7 +151,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 					if(iExpires < GetTime())
 					{
 						DeleteKey(sKey);
-						UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_KEY_NOT_EXIST");
+						UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_KEY_NOT_EXIST");
 						return;
 					}
 				}
@@ -160,13 +160,13 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 				if(!iUses)
 				{
 					DeleteKey(sKey);
-					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_KEY_NOT_EXIST");
+					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_KEY_NOT_EXIST");
 					return;
 				}
 				
 				if(SQL_FetchInt(hResult, 4))
 				{
-					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_KEY_ALREADY_USED");
+					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_KEY_ALREADY_USED");
 					return;
 				}
 
@@ -188,6 +188,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 				SetPackPosition(hDataPack, DP_OnUseCallback);
 				fUseCallback = Function:ReadPackCell(hDataPack);
 
+				sError = "unknown";
 				bResult = false;
 				Call_StartFunction(hPlugin, fUseCallback);
 				Call_PushCell(iClient);
@@ -201,7 +202,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 
 				if(!bResult)
 				{
-					UTIL_ReplyToCommand(iClient, CmdReplySource, "%s", sError);
+					UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%s", "ERROR", sError);
 					return;
 				}
 
@@ -258,15 +259,15 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 			if(g_iAttempts[iClient]++ >= g_CVAR_iAttempts)
 			{
 				BlockClient(iClient);
-				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_BLOCKED");
+				UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_BLOCKED");
 				return;
 			}
 
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_KEY_LEFT", g_CVAR_iAttempts-g_iAttempts[iClient]);
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_KEY_LEFT", g_CVAR_iAttempts-g_iAttempts[iClient]);
 		}
 		else
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_KEY");
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_KEY");
 		}
 	}
 }
@@ -277,7 +278,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 
 	if(iArgs < 5)
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_NUM_ARGS");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_NUM_ARGS");
 		return Plugin_Handled;
 	}
 
@@ -286,11 +287,11 @@ public Action:AddKey_CMD(iClient, iArgs)
 
 	if(!GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_TYPE");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_TYPE");
 		return Plugin_Handled;
 	}
 
-	decl Handle:hParamsArr, Handle:hPlugin, Function:FuncOnValidateParams, String:sKey[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iLifeTime, iUses, iCount, i, bool:bResult, bool:bGen;
+	decl String:sKey[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iLifeTime, iUses, iCount, bool:bGen;
 
 	GetCmdArg(0, SZF(sKey));
 	
@@ -302,7 +303,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 		iCount = StringToInt(sParam);
 		if(iCount < 1)
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_AMOUNT");
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_AMOUNT");
 			return Plugin_Handled;
 		}
 	}
@@ -320,7 +321,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 	iLifeTime = StringToInt(sParam);
 	if(iLifeTime < 0)
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_LIFETIME");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_LIFETIME");
 		return Plugin_Handled;
 	}
 
@@ -328,9 +329,11 @@ public Action:AddKey_CMD(iClient, iArgs)
 	iUses = StringToInt(sParam);
 	if(iUses < 1)
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_USES");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_USES");
 		return Plugin_Handled;
 	}
+
+	decl Handle:hParamsArr, Handle:hPlugin, Function:FuncOnValidateParams, i, bool:bResult;
 
 	hParamsArr = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
 
@@ -346,6 +349,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 	SetPackPosition(hDataPack, DP_OnValidateCallback);
 	FuncOnValidateParams = Function:ReadPackCell(hDataPack);
 
+	sError = "unknown";
 	bResult = false;
 	Call_StartFunction(hPlugin, FuncOnValidateParams);
 	Call_PushCell(iClient);
@@ -358,7 +362,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 	if(!bResult)
 	{
 		CloseHandle(hParamsArr);
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%s", sError);
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%s", "ERROR", sError);
 		return Plugin_Handled;
 	}
 
@@ -450,7 +454,7 @@ public SQL_Callback_SearchKey(Handle:hOwner, Handle:hResult, const String:sError
 			i = GET_CID(ReadPackCell(hDP));
 			if(i != -1)
 			{
-				UTIL_ReplyToCommand(i, ReplySource:ReadPackCell(hDP), "%t", "ERROR_KEY_ALREADY_EXISTS", sKey);
+				UTIL_ReplyToCommand(i, ReplySource:ReadPackCell(hDP), "%t%t", "ERROR", "ERROR_KEY_ALREADY_EXISTS", sKey);
 			}
 
 			CloseHandle(hParamsArr);
@@ -606,7 +610,7 @@ public SQL_Callback_AddKey(Handle:hOwner, Handle:hResult, const String:sError[],
 	{
 		if(iClient != -1)
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_CREATE_KEY", sKey);
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_CREATE_KEY", sKey);
 		}
 
 		LogToFile(g_sLogFile, "%T", "LOG_ERROR_CREATE_KEY", LANG_SERVER, sKey, sName, sAuth, sExpires, iUses, sKeyType, sParams);
@@ -622,7 +626,7 @@ public Action:DelKey_CMD(iClient, iArgs)
 
 	if(iArgs != 1)
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_NUM_ARGS");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_NUM_ARGS");
 		return Plugin_Handled;
 	}
 
@@ -632,7 +636,7 @@ public Action:DelKey_CMD(iClient, iArgs)
 	iLength = strlen(sKey);
 	if(iLength > KEYS_MAX_LENGTH || iLength < 8)
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_KEY");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_KEY");
 		return Plugin_Handled;
 	}
 
@@ -685,7 +689,7 @@ public SQL_Callback_RemoveKey(Handle:hOwner, Handle:hResult, const String:sError
 		}
 		else
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_REMOVE_KEY", sKey);
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_REMOVE_KEY", sKey);
 
 			LogToFile(g_sLogFile, "%T", "LOG_SUCCESS_REMOVE_KEY", LANG_SERVER, sKey, sName, sAuth);
 		}
@@ -715,7 +719,7 @@ public Action:ClearKeys_CMD(iClient, iArgs)
 		GetCmdArg(1, SZF(sKeyType));
 		if(FindStringInArray(g_hKeysArray, sKeyType) == -1)
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_INCORRECT_TYPE");
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_TYPE");
 			return Plugin_Handled;
 		}
 	}
@@ -818,12 +822,12 @@ public SQL_Callback_RemoveKeys(Handle:hOwner, Handle:hResult, const String:sErro
 	{
 		if(sKeyType[0])
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_REMOVE_KEYS_TYPE", sKeyType);
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_REMOVE_KEYS_TYPE", sKeyType);
 			LogToFile(g_sLogFile, "%T", "LOG_ERROR_REMOVE_KEYS_TYPE", LANG_SERVER, sKeyType, sName, sAuth);
 		}
 		else
 		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_REMOVE_KEYS");
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_REMOVE_KEYS");
 			LogToFile(g_sLogFile, "%T", "LOG_ERROR_REMOVE_KEYS", LANG_SERVER, sKeyType, sName, sAuth);
 		}
 	}
@@ -989,6 +993,6 @@ public SQL_Callback_SelectKeysList(Handle:hOwner, Handle:hResult, const String:s
 	}
 	else
 	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "ERROR_LIST_NO_KEYS");
+		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_LIST_NO_KEYS");
 	}
 }
