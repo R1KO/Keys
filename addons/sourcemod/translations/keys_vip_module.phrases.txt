@@ -2,20 +2,20 @@
 {
 	"ERROR_INVALID_CREDITS"
 	{
-		"ru"	"ОШИБКА: Неверное количество кредитов!"
-		"en"	"ERROR: Wrong number of credits!"
+		"ru"	"Неверное количество кредитов!"
+		"en"	"Wrong number of credits!"
 	}
 
 	"ERROR_INVALID_GROUP"
 	{
-		"ru"	"ОШИБКА: Неверная VIP-группа!"
-		"en"	"ERROR: Invalid VIP-group!"
+		"ru"	"Неверная VIP-группа!"
+		"en"	"Invalid VIP-group!"
 	}
 
 	"ERROR_INVALID_TIME"
 	{
-		"ru"	"ОШИБКА: Неверное время!"
-		"en"	"ERROR: Invalid time!"
+		"ru"	"Неверное время!"
+		"en"	"Invalid time!"
 	}
 
 	"ERROR_VIP_ALREADY"
