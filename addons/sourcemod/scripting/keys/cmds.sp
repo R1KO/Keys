@@ -518,6 +518,8 @@ public SQL_Callback_SearchKey(Handle:hOwner, Handle:hResult, const String:sError
 		Format(SZF(sBufferValues), "%s, '%s'", sBufferValues, sParam);
 	}
 
+	SQL_FastQuery(g_hDatabase, "SET CHARSET 'utf8'");
+	
 	if(!g_iServerID)
 	{
 		FormatEx(SZF(sQuery), "INSERT INTO `table_keys` (`key_name`, `type`, `expires`, `uses`, %s) VALUES ('%s', '%s', %d, %d, %s);", sBufferColumns, sKey, sKeyType, iExpires, iUses, sBufferValues);

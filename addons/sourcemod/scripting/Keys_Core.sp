@@ -189,10 +189,15 @@ public SQL_Callback_TxnFailure(Handle:hDB, any:data, iNumQueries, const String:s
 
 public SQL_Callback_TxnSuccess(Handle:hDB, any:data, iNumQueries, Handle:hResults[], any:queryData[])
 {
-	if(g_bDBMySQL && g_iServerID == -1)
+	if(g_bDBMySQL)
 	{
-		GetServerID(true);
-		return;
+		SQL_SetCharset(g_hDatabase, "utf8");
+
+		if(g_iServerID == -1)
+		{
+			GetServerID(true);
+			return;
+		}
 	}
 
 	Notify_Started();
