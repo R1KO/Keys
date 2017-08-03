@@ -213,7 +213,7 @@ public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String
 			return false;
 		}
 
-		if(iClientID == -1)
+		if(bVip && iClientID == -1)
 		{
 			VIP_RemoveClientVIP(iClient, false, false);
 		}
