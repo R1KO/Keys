@@ -1,11 +1,10 @@
 
-static Handle:g_hGlobalForward_OnCoreStarted;
+static Handle g_hGlobalForward_OnCoreStarted;
 
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
+public APLRes AskPluginLoad2(Handle hMySelf, bool bLate, char[] szError, int iErr_max) 
 {
-	MarkNativeAsOptional("GetClientAuthId");
-	MarkNativeAsOptional("GetClientAuthString");
-	
+//	Stats_Init();
+
 	g_hGlobalForward_OnCoreStarted = CreateGlobalForward("Keys_OnCoreStarted", ET_Ignore);
 
 	CreateNative("Keys_IsCoreStarted", Native_IsCoreStarted);
@@ -20,147 +19,142 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("Keys_IsValidKey", Native_IsValidKey);
 	CreateNative("Keys_GetKeyData", Native_GetKeyData);
 	CreateNative("Keys_GenerateKey", Native_GenerateKey);
-	CreateNative("Keys_AddKey", Keys_AddKey);
-	CreateNative("Keys_RemoveKey", Keys_RemoveKey);
-	CreateNative("Keys_UseKey", Keys_UseKey);
-	
-
-	/*
-	- Проверка наличия типа ключа
-	- Проверка наличия ключа
-	- Генерация ключа
-	- Добавление ключа
-	- Получение массива с типами ключей
-	- Активация ключа
-	*/
+	CreateNative("Keys_AddKey", Native_AddKey);
+	CreateNative("Keys_RemoveKey", Native_RemoveKey);
+	CreateNative("Keys_UseKey", Native_UseKey);
 
 	RegPluginLibrary("keys_core");
 
 	return APLRes_Success; 
 }
 
-CreateForward_OnCoreStarted()
+void API_CreateForward_OnCoreStarted()
 {
 	Call_StartForward(g_hGlobalForward_OnCoreStarted);
 	Call_Finish();
 }
 
-public Native_IsCoreStarted(Handle:hPlugin, iNumParams)
+public int Native_IsCoreStarted(Handle hPlugin, int iNumParams)
 {
-	return g_bIsStarted;
+	return view_as<int>(g_bIsStarted);
 }
 
-public Native_GetCoreDatabase(Handle:hPlugin, iNumParams)
+public int Native_GetCoreDatabase(Handle hPlugin, int iNumParams)
 {
-	return _:CloneHandle(g_hDatabase, hPlugin);
+	return view_as<int>(CloneHandle(g_hDatabase, hPlugin));
 }
 
-public Native_GetDatabaseType(Handle:hPlugin, iNumParams)
+public int Native_GetDatabaseType(Handle hPlugin, int iNumParams)
 {
-	return g_bDBMySQL;
+	return view_as<int>(g_bDBMySQL);
 }
 
-public Native_RegKey(Handle:hPlugin, iNumParams)
+public int Native_RegKey(Handle hPlugin, int iNumParams)
 {
-	decl String:sKeyType[KEYS_MAX_LENGTH];
-	GetNativeString(1, SZF(sKeyType));
-	
-	if(FindStringInArray(g_hKeysArray, sKeyType) != -1)
+	char szKeyType[KEYS_MAX_LENGTH];
+	GetNativeString(1, SZF(szKeyType));
+
+	if(g_hKeysArray.FindString(szKeyType) != -1)
 	{
-		ThrowNativeError(SP_ERROR_NATIVE, "Тип ключа \"%s\" уже зарегистрирован!", sKeyType);
+		ThrowNativeError(SP_ERROR_NATIVE, "Тип ключа \"%s\" уже зарегистрирован!", szKeyType);
 		return false;
 	}
-	
-	new Handle:hDataPack = CreateDataPack();
-	WritePackCell(hDataPack, hPlugin);
-	WritePackCell(hDataPack, GetNativeCell(2));
-	WritePackCell(hDataPack, GetNativeCell(3));
-	WritePackCell(hDataPack, GetNativeCell(4));
 
-	SetTrieValue(g_hKeysTrie, sKeyType, hDataPack);
-	PushArrayString(g_hKeysArray, sKeyType);
+	DataPack hDataPack = new DataPack();
+	hDataPack.WriteCell(hPlugin);
+	hDataPack.WriteFunction(GetNativeCell(2));
+
+	g_hKeysTrie.SetValue(szKeyType, hDataPack);
+	g_hKeysArray.PushString(szKeyType);
 
 	return true;
 }
 
-public Native_UnregKey(Handle:hPlugin, iNumParams)
+public int Native_UnregKey(Handle hPlugin, int iNumParams)
 {
-	decl String:sKeyType[KEYS_MAX_LENGTH], index;
-	GetNativeString(1, SZF(sKeyType));
-	
-	if((index = FindStringInArray(g_hKeysArray, sKeyType)) != -1)
+	char szKeyType[KEYS_MAX_LENGTH];
+	GetNativeString(1, SZF(szKeyType));
+
+	int index;
+	if((index = g_hKeysArray.FindString(szKeyType)) != -1)
 	{
-		RemoveFromArray(g_hKeysArray, index);
-		decl Handle:hDataPack;
-		if(GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
+		g_hKeysArray.Erase(index);
+		DataPack hDataPack;
+		if(g_hKeysTrie.GetValue(szKeyType, hDataPack))
 		{
-			CloseHandle(hDataPack);
+			delete hDataPack;
 		}
-		RemoveFromTrie(g_hKeysTrie, sKeyType);
+		g_hKeysTrie.Remove(szKeyType);
 	}
 }
 
-public Native_IsValidKeyType(Handle:hPlugin, iNumParams)
+public int Native_IsValidKeyType(Handle hPlugin, int iNumParams)
 {
-	decl String:sKeyType[KEYS_MAX_LENGTH], index;
-	GetNativeString(1, SZF(sKeyType));
-	
-	return (FindStringInArray(g_hKeysArray, sKeyType) != -1);
+	char szKeyType[KEYS_MAX_LENGTH];
+	GetNativeString(1, SZF(szKeyType));
+
+	return (FindStringInArray(g_hKeysArray, szKeyType) != -1);
 }
 
-public Native_FillArrayByKeyTypes(Handle:hPlugin, iNumParams)
+public int Native_FillArrayByKeyTypes(Handle hPlugin, int iNumParams)
 {
-	return CloneArray(g_hKeysArray);
+	return view_as<int>(g_hKeysArray.Clone());
 }
 
-public Native_IsValidKey(Handle:hPlugin, iNumParams)
+public int Native_IsValidKey(Handle hPlugin, int iNumParams)
 {
-	decl Handle:hDP, String:sKey[KEYS_MAX_LENGTH], String:sQuery[256];
-	GetNativeString(1, SZF(sKey));
+	char szKey[KEYS_MAX_LENGTH], szQuery[PMP], szSID[64];
+	GetNativeString(1, SZF(szKey));
 	
-	hDP = CreateDataPack();
-	WritePackCell(hDP, hPlugin);
-	WritePackCell(hDP, GetNativeCell(2));
-	WritePackString(hDP, sKey);
+	DataPack hDP = new DataPack();
+	hDP.WriteCell(hPlugin);
+	hDP.WriteFunction(GetNativeCell(2));
+	hDP.WriteString(szKey);
+	hDP.WriteCell(GetNativeCell(3));
 
-	if(!g_iServerID)
+	if(!g_CVAR_iServerID)
 	{
-		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s' LIMIT 1;", sKey);
+		szSID[0] = 0;
 	}
 	else
 	{
-		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s' AND `sid` = %d LIMIT 1;", sKey, g_iServerID);
+		FormatEx(SZF(szSID), " AND `k_sid` = %d", g_CVAR_iServerID);
 	}
 
-	SQL_TQuery(g_hDatabase, SQL_Callback_Ntv_IsValidKey, sQuery, hDP);
+	FormatEx(SZF(szQuery), "SELECT `k_id` FROM `keys_tokens` WHERE `k_name` = '%s'%s LIMIT 1;", szKey, szSID);
+
+	g_hDatabase.Query(SQL_Callback_Ntv_IsValidKey, szQuery, hDP);
 }
 
-public SQL_Callback_Ntv_IsValidKey(Handle:hOwner, Handle:hResult, const String:sDBError[], any:hDP)
+public void SQL_Callback_Ntv_IsValidKey(Database hDB, DBResultSet hResult, const char[] szDbError, any hCbDP)
 {
-	if (hResult == INVALID_HANDLE || sDBError[0])
+	DataPack hDP = view_as<DataPack>(hCbDP);
+
+	if (hResult == null || szDbError[0])
 	{
-		CloseHandle(hDP);
-		LogError("SQL_Callback_Ntv_IsValidKey: %s", sDBError);
+		delete hDP;
+		LogError("SQL_Callback_Ntv_IsValidKey: %s", szDbError);
 		return;
 	}
 	
-	ResetPack(hDP);
-	decl Handle:hPlugin, Function:fCallback, String:sKey[KEYS_MAX_LENGTH], bool:bKeyExists;
-	hPlugin = Handle:ReadPackCell(hDP);
-	fCallback = Function:ReadPackCell(hDP);
-	ReadPackString(SZF(sKey));
-	CloseHandle(hDP);
+	hDP.Reset();
+	Handle hPlugin = view_as<Handle>(hDP.ReadCell());
+	Function fCallback = hDP.ReadFunction();
+	char szKey[KEYS_MAX_LENGTH];
+	hDP.ReadString(SZF(szKey));
+	any iData = hDP.ReadCell();
+	delete hDP;
 	
-	bKeyExists = false;
+	bool bKeyExists = false;
 
-	if(SQL_FetchRow(hResult))
+	if(hResult.FetchRow())
 	{
-		iExpires = SQL_FetchInt(hResult, 0);
+		int iExpires = hResult.FetchInt(0);
 		if(iExpires)
 		{
 			if(iExpires < GetTime())
 			{
-				DeleteKey(sKey);
+				Keys_Delete(szKey);
 			}
 			else
 			{
@@ -173,243 +167,251 @@ public SQL_Callback_Ntv_IsValidKey(Handle:hOwner, Handle:hResult, const String:s
 		}
 	}
 
-	Call_StartFunction(hPlugin, fUseCallback);
-	Call_PushString(sKey);
+	Call_StartFunction(hPlugin, fCallback);
+	Call_PushString(szKey);
 	Call_PushCell(bKeyExists);
+	Call_PushCell(iData);
 	Call_Finish();
 }
 
-public Native_GetKeyData(Handle:hPlugin, iNumParams)
+public int Native_GetKeyData(Handle hPlugin, int iNumParams)
 {
-	decl Handle:hDP, String:sKey[KEYS_MAX_LENGTH], String:sQuery[256];
-	GetNativeString(1, SZF(sKey));
+	char szKey[KEYS_MAX_LENGTH], szQuery[PMP], szSID[64];
+	GetNativeString(1, SZF(szKey));
 	
-	hDP = CreateDataPack();
-	WritePackCell(hDP, hPlugin);
-	WritePackCell(hDP, GetNativeCell(2));
-	WritePackString(hDP, sKey);
+	DataPack hDP = new DataPack();
+	hDP.WriteCell(hPlugin);
+	hDP.WriteFunction(GetNativeCell(2));
+	hDP.WriteString(szKey);
+	hDP.WriteCell(GetNativeCell(3));
 
-	if(!g_iServerID)
+	if(!g_CVAR_iServerID)
 	{
-		FormatEx(SZF(sQuery), "SELECT `type`, `expires`, `uses`, `param1`, `param2`, `param3`, `param4`, `param5` FROM `table_keys` WHERE `key_name` = '%s' LIMIT 1;", sKey);
+		szSID[0] = 0;
 	}
 	else
 	{
-		FormatEx(SZF(sQuery), "SELECT `type`, `expires`, `uses`, `param1`, `param2`, `param3`, `param4`, `param5` FROM `table_keys` WHERE `key_name` = '%s' AND `sid` = %d LIMIT 1;", sKey, g_iServerID);
+		FormatEx(SZF(szSID), " AND `k_sid` = %d", g_CVAR_iServerID);
 	}
 
-	SQL_TQuery(g_hDatabase, SQL_Callback_Ntv_GetKeyData, sQuery, hDP);
+	FormatEx(SZF(szQuery), "SELECT `k_id`, `k_type`, `k_expires`, `k_uses` FROM `keys_tokens` WHERE `k_name` = '%s'%s LIMIT 1;", szKey, szSID);
+
+	g_hDatabase.Query(SQL_Callback_Ntv_GetKeyData, szQuery, hDP);
 }
 
-public SQL_Callback_Ntv_GetKeyData(Handle:hOwner, Handle:hResult, const String:sDBError[], any:iData)
+public void SQL_Callback_Ntv_GetKeyData(Database hDB, DBResultSet hResult, const char[] szDbError, any hCbDP)
 {
-	if (hResult == INVALID_HANDLE || sDBError[0])
+	DataPack hDP = view_as<DataPack>(hCbDP);
+
+	if (hResult == null || szDbError[0])
 	{
-		LogError("SQL_Callback_Ntv_GetKeyData: %s", sDBError);
+		delete hDP;
+		LogError("SQL_Callback_Ntv_GetKeyData: %s", szDbError);
 		return;
 	}
 
-	ResetPack(hDP);
-	decl Handle:hPlugin, Function:fCallback, String:sKey[KEYS_MAX_LENGTH], bool:bKeyExists, Handle:hParamsArr, String:sKeyType[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i;
-	hPlugin = Handle:ReadPackCell(hDP);
-	fCallback = Function:ReadPackCell(hDP);
-	ReadPackString(SZF(sKey));
-	CloseHandle(hDP);
+	hDP.Reset();
 
-	bKeyExists = false;
+	char szKey[KEYS_MAX_LENGTH], szKeyType[KEYS_MAX_LENGTH];
+	Handle hPlugin = view_as<Handle>(hDP.ReadCell());
+	Function fCallback = hDP.ReadFunction();
+	hDP.ReadString(SZF(szKey));
+	any iData = hDP.ReadCell();
 
-	if(SQL_FetchRow(hResult))
+	bool bKeyExists = false;
+	int iKeyID, iExpires, iUses;
+
+	if(hResult.FetchRow())
 	{
-		iExpires = SQL_FetchInt(hResult, 1);
+		iExpires = hResult.FetchInt(2);
 		if(!iExpires || iExpires > GetTime())
 		{
-			SQL_FetchString(hResult, 1, SZF(sKeyType));
-			if((FindStringInArray(g_hKeysArray, sKeyType) != -1))
+			hResult.FetchString(1, SZF(szKeyType));
+			if(g_hKeysArray.FindString(szKeyType) != -1)
 			{
-				iUses = SQL_FetchInt(hResult, 2);
+				iUses = hResult.FetchInt(3);
 				if(iUses)
 				{
-					hParamsArr = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
-					for(i = 3; i < 8; ++i)
-					{
-						if(SQL_IsFieldNull(hResult, i))
-						{
-							break;
-						}
-
-						SQL_FetchString(hResult, i, SZF(sParam));
-						PushArrayString(hParamsArr, sParam);
-					}
-
 					bKeyExists = true;
+					iKeyID = hResult.FetchInt(0);
 				}
 				else
 				{
-					DeleteKey(sKey);
+					Keys_Delete(szKey);
 				}
 			}
 		}
 		else
 		{
-			DeleteKey(sKey);
+			Keys_Delete(szKey);
 		}
 	}
 	
 	if(!bKeyExists)
 	{
-		sKeyType[0] = iCount = iExpires = 0;
-		hParamsArr = INVALID_HANDLE;
+		Call_StartFunction(hPlugin, fCallback);
+		Call_PushString(szKey);
+		Call_PushCell(false);
+		Call_PushString(NULL_STRING);
+		Call_PushCell(0);
+		Call_PushCell(0);
+		Call_PushCell(0);
+		Call_PushCell(iData);
+		Call_Finish();
+		delete hDP;
+		return;
+	}
+
+	hDP.WriteString(szKeyType);
+	hDP.WriteCell(iUses);
+	hDP.WriteCell(iExpires);
+
+	char szQuery[PMP];
+
+	FormatEx(SZF(szQuery), "SELECT `p_num`, `p_value` FROM `keys_params` WHERE `p_kid` = '%d' ORDER BY `p_num`;", iKeyID);
+
+	g_hDatabase.Query(SQL_Callback_Ntv_GetKeyDataParams, szQuery, hDP);
+}
+
+public void SQL_Callback_Ntv_GetKeyDataParams(Database hDB, DBResultSet hResult, const char[] szDbError, any hCbDP)
+{
+	DataPack hDP = view_as<DataPack>(hCbDP);
+
+	if (hResult == null || szDbError[0])
+	{
+		delete hDP;
+		LogError("SQL_Callback_Ntv_GetKeyDataParams: %s", szDbError);
+		return;
+	}
+
+	hDP.Reset();
+
+	char szKey[KEYS_MAX_LENGTH], szKeyType[KEYS_MAX_LENGTH], szParam[KEYS_MAX_LENGTH];
+	Handle hPlugin = view_as<Handle>(hDP.ReadCell());
+	Function fCallback = hDP.ReadFunction();
+	hDP.ReadString(SZF(szKey));
+	any iData = hDP.ReadCell();
+	hDP.ReadString(SZF(szKeyType));
+	int iUses = hDP.ReadCell();
+	int iExpires = hDP.ReadCell();
+	delete hDP;
+
+	ArrayList hParamsArr = new ArrayList(ByteCountToCells(KEYS_MAX_LENGTH));
+	while(hResult.FetchRow())
+	{
+		hResult.FetchString(1, SZF(szParam));
+		hParamsArr.PushString(szParam);
 	}
 
 	Call_StartFunction(hPlugin, fCallback);
-	Call_PushString(sKey);
-	Call_PushCell(bKeyExists);
-	Call_PushString(sKeyType);
-	Call_PushCell(iCount);
+	Call_PushString(szKey);
+	Call_PushCell(true);
+	Call_PushString(szKeyType);
+	Call_PushCell(iUses);
 	Call_PushCell(iExpires);
 	Call_PushCell(hParamsArr);
+	Call_PushCell(iData);
 	Call_Finish();
-
-	if(hParamsArr)
-	{
-		CloseHandle(hParamsArr);
-	}
 }
 
-public Native_GenerateKey(Handle:hPlugin, iNumParams)
+public int Native_GenerateKey(Handle hPlugin, int iNumParams)
 {
-	decl String:sKey[KEYS_MAX_LENGTH], String:sTemplate[64];
+	char szKey[KEYS_MAX_LENGTH], sTemplate[64];
 	GetNativeString(3, SZF(sTemplate));
 
-	UTIL_GenerateKey(SZF(sKey), g_CVAR_sKeyTemplate);
-	SetNativeString(1, sKey, GetNativeCell(2), true);
+	Keys_Generate(SZF(szKey));
+	SetNativeString(1, szKey, GetNativeCell(2), true);
 }
 
-// native Keys_AddKey(const String:sKey[] = "", const String:sKeyType[], iUses, iLifeTime, Handle:hParamsArr, KeyAddCallback:AddKeyCallback);
-// functag public KeyAddCallback(const String:sKey[], bool:bSuccess, const String:sError[]);
-public Native_AddKey(Handle:hPlugin, iNumParams)
+// Keys_AddKey(int iClient = 0, const char[] szKey = NULL_STRING, const char[] szKeyType, int iUses, iLifeTime, ArrayList hParamsArr, KeyNativeActionCallback AddKeyCallback, any iData);
+public int Native_AddKey(Handle hPlugin, int iNumParams)
 {
-	new iClient = GetNativeCell(1);
-	if(iClient && (iClient < 0 || iClient > MaxClients || !IsClientInGame(iClient) || !IsFakeClient(iClient)))
+	int iClient = GetNativeCell(1);
+	if(iClient && (iClient < 0 || iClient > MaxClients || !IsClientInGame(iClient) || IsFakeClient(iClient)))
 	{
-		return;
+		return 0;
 	}
 
-	decl iHandle:hDP, String:sKey[KEYS_MAX_LENGTH], String:sKeyType[KEYS_MAX_LENGTH], String:sError[256], iLifeTime, iUses, Handle:hParamsArr, String:sQuery[256];
-	GetNativeString(2, SZF(sKey));
-	GetNativeString(3, SZF(sKeyType));
-	hParamsArr = Handle:GetNativeCell(6);
+	char szKey[KEYS_MAX_LENGTH], szKeyType[KEYS_MAX_LENGTH], szError[PMP];
+	GetNativeString(2, SZF(szKey));
+	GetNativeString(3, SZF(szKeyType));
+	int iUses = GetNativeCell(4);
+	int iLifeTime = GetNativeCell(5);
+	ArrayList hParamsArr = view_as<ArrayList>(GetNativeCell(6));
+	Function fCallback = GetNativeFunction(7);
+	any iData = GetNativeCell(8);
 
-	sError[0] = 0;
+	szError[0] = 0;
 
-	if(!UTIL_CheckKey(sKey, sKeyType, GetNativeCell(5), GetNativeCell(4), hParamsArr, SZF(sError), iClient))
+	if(!Keys_Validate(szKey, szKeyType, iUses, iLifeTime, hParamsArr, SZF(szError), iClient))
 	{
-		CloseHandle(hParamsArr);
-		CreateCallback_AddKey(hPlugin, Function:GetNativeCell(7), false, sError);
-		
-		return;
+		delete hParamsArr;
+		API_Callback(Add, hPlugin, fCallback, iClient, szKey, false, szError, iData);
 
-	//	Keys_AddKey(const String:sKey[] = "", const String:sKeyType[], iUses, iLifeTime, Handle:hParamsArr, KeyAddCallback:AddKeyCallback);
-	//	KeyAddCallback(const String:sKey[], bool:bSuccess, const String:sError[]);
+		return 0;
 	}
 
-//	CloseHandle(hParamsArr);
-	
-	decl Handle:hDP, String:sQuery[256], iExpires;
-
-	iClient = GET_UID(iClient);
-
-	iExpires = iLifeTime ? (iLifeTime + GetTime()):iLifeTime;
-	
-	hDP = CreateDataPack();
-	WritePackCell(hDP, CloneArray(hParamsArr));
-
-	if(sKey[0])
-	{
-		WritePackString(hDP, sKey);
-		WritePackCell(hDP, true);
-	}
-	else
-	{
-		UTIL_GenerateKey(sKey, KEYS_MAX_LENGTH, g_CVAR_sKeyTemplate);
-
-		WritePackString(hDP, sKey);
-		WritePackCell(hDP, false);
-	}
-
-	WritePackCell(hDP, iClient);
-	WritePackCell(hDP, CmdReplySource);
-	WritePackString(hDP, sKeyType);
-	WritePackCell(hDP, iUses);
-	WritePackCell(hDP, iExpires);
-	WritePackCell(hDP, iLifeTime);
-	WritePackCell(hDP, hPlugin);
-	WritePackCell(hDP, GetNativeCell(6));
-	
-	if(!g_iServerID)
-	{
-		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s';", sKey);
-	}
-	else
-	{
-		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s' AND `sid` = %d;", sKey, g_iServerID);
-	}
-	SQL_TQuery(g_hDatabase, SQL_Callback_SearchKey, sQuery, hDP);
+	Keys_Add(szKey, szKeyType, iUses, iLifeTime, -1, hParamsArr, iClient, iClient ? SM_REPLY_TO_CHAT:SM_REPLY_TO_CONSOLE, hPlugin, fCallback, iData);
+	return 0;
 }
 
-CreateCallback_AddKey(Handle:hPlugin, Function:fCallback, const String:sKey[], bool:bSuccess = true, const String:sError[] = NULL_STRING)
+//Keys_RemoveKey(int iClient = 0, const char[] szKey, KeyNativeActionCallback RemoveKeyCallback, any iData = 0);
+public int Native_RemoveKey(Handle hPlugin, int iNumParams)
+{
+	int iClient = GetNativeCell(1);
+	if(iClient && (iClient < 0 || iClient > MaxClients || !IsClientInGame(iClient) || IsFakeClient(iClient)))
+	{
+		return 0;
+	}
+
+	char szKey[KEYS_MAX_LENGTH];
+	GetNativeString(2, SZF(szKey));
+
+	Function fCallback = GetNativeFunction(3);
+	any iData = GetNativeCell(4);
+	
+	Keys_Delete(szKey, true, iClient, iClient ? SM_REPLY_TO_CHAT:SM_REPLY_TO_CONSOLE, hPlugin, fCallback, iData);
+	return 0;
+}
+
+// Keys_UseKey(int iClient, const char[] szKey, bool bNotify, bool bIgnoreBlock, KeyNativeActionCallback UseKeyCallback, any iData = 0);
+public int Native_UseKey(Handle hPlugin, int iNumParams)
+{
+	int iClient = GetNativeCell(1);
+	if(iClient < 1 || iClient > MaxClients || !IsClientInGame(iClient) || IsFakeClient(iClient))
+	{
+		return 0;
+	}
+
+	char szKey[KEYS_MAX_LENGTH];
+	GetNativeString(2, SZF(szKey));
+	bool bNotify = GetNativeCell(3);
+	bool bIgnoreBlock = GetNativeCell(4);
+
+	Function fCallback = GetNativeFunction(5);
+	any iData = GetNativeCell(6);
+
+	if(!bIgnoreBlock && g_bIsBlocked[iClient])
+	{
+		char szError[PMP];
+		FormatEx(SZF(szError), "%T%T", "ERROR", iClient, "ERROR_BLOCKED", iClient);
+		API_Callback(Use, hPlugin, fCallback, iClient, szKey, false, szError, iData);
+		return 0;
+	}
+	
+	Keys_Use(szKey, iClient, SM_REPLY_TO_CHAT, bNotify, bIgnoreBlock, hPlugin, fCallback, iData);
+	return 0;
+}
+
+// function void (int iClient, const char[] szKey, bool bSuccess, const char[] szError, any iData);
+void API_Callback(KeysNativeAction eKeysAction, Handle hPlugin, Function fCallback, int iClient, const char[] szKey, bool bSuccess = true, const char[] szError = NULL_STRING, any iData)
 {
 	Call_StartFunction(hPlugin, fCallback);
-	Call_PushString(sKey);
+	Call_PushCell(eKeysAction);
+	Call_PushCell(iClient);
+	Call_PushString(szKey);
 	Call_PushCell(bSuccess);
-	Call_PushString(sError);
+	Call_PushString(szError);
+	Call_PushCell(iData);
 	Call_Finish();
-}
-
-public Native_RemoveKey(Handle:hPlugin, iNumParams)
-{
-	decl Handle:hDP, String:sKey[KEYS_MAX_LENGTH], String:sQuery[256];
-	GetNativeString(1, SZF(sKey));
-	
-	hDP = CreateDataPack();
-	WritePackCell(hDP, hPlugin);
-	WritePackCell(hDP, GetNativeCell(2));
-	WritePackString(hDP, sKey);
-
-	if(!g_iServerID)
-	{
-		FormatEx(SZF(sQuery), "DELETE FROM `table_keys` WHERE `key_name` = '%s';", sKey);
-	}
-	else
-	{
-		FormatEx(SZF(sQuery), "DELETE FROM `table_keys` WHERE `key_name` = '%s' AND `sid` = %d;", sKey, g_iServerID);
-	}
-	SQL_TQuery(g_hDatabase, SQL_Callback_Ntv_RemoveKey, sQuery, hDP);
-}
-
-public SQL_Callback_Ntv_RemoveKey(Handle:hOwner, Handle:hResult, const String:sDBError[], any:iData)
-{
-	if (hResult == INVALID_HANDLE || sDBError[0])
-	{
-		LogError("SQL_Callback_Ntv_RemoveKey: %s", sDBError);
-		return;
-	}
-
-	ResetPack(hDP);
-	decl Handle:hPlugin, Function:fCallback, String:sKey[KEYS_MAX_LENGTH];
-	hPlugin = Handle:ReadPackCell(hDP);
-	fCallback = Function:ReadPackCell(hDP);
-	ReadPackString(SZF(sKey));
-	CloseHandle(hDP);
-
-	Call_StartFunction(hPlugin, fCallback);
-	Call_PushString(sKey);
-	Call_PushCell(bool:SQL_GetAffectedRows(hOwner));
-	Call_Finish();
-}
-
-// Использует ключ игроком
-public Native_UseKey(Handle:hPlugin, iNumParams)
-{
-	
 }
