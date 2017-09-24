@@ -1,7 +1,7 @@
 
 public void OnMapStart() 
 {
-//	Stats_OnMapStart();
+	Stats_OnMapStart();
 }
 
 public void OnConfigsExecuted()

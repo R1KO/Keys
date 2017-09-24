@@ -3,7 +3,7 @@ static Handle g_hGlobalForward_OnCoreStarted;
 
 public APLRes AskPluginLoad2(Handle hMySelf, bool bLate, char[] szError, int iErr_max) 
 {
-//	Stats_Init();
+	Stats_Init();
 
 	g_hGlobalForward_OnCoreStarted = CreateGlobalForward("Keys_OnCoreStarted", ET_Ignore);
 

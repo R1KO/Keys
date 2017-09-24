@@ -21,7 +21,7 @@ public Plugin myinfo =
 #include "Keys/CMD.sp"
 #include "Keys/EVENTS.sp"
 #include "Keys/BLOCK.sp"
-// #include "Keys/STATS.sp"
+#include "Keys/STATS.sp"
 
 public void OnPluginStart()
 {
@@ -58,7 +58,7 @@ public void OnPluginStart()
 	hCvar.AddChangeHook(OnBlockTimeChange);
 	g_CVAR_iBlockTime = hCvar.IntValue;
 	
-//	Stats_OnPluginStart();
+	Stats_OnPluginStart();
 
 	AutoExecConfig(true, "Keys_Core");
 

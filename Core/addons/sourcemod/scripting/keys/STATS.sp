@@ -54,7 +54,7 @@ void Stats_Init()
 
 static ConVar	g_hCvar_GetIPMethod;
 
-void Stats_OnPluginStart();
+void Stats_OnPluginStart()
 {
 	g_hCvar_GetIPMethod = CreateConVar("sm_keys_stats_get_ip_method", "0", "Способ определения IP-адреса\n\
 																			0 - Из серверной переменной hostip\n\
@@ -228,7 +228,7 @@ public void OnRequestComplete(HTTPResponse hResponse, any iData)
 #endif
 
 #if defined _SteamWorks_Included
-public int SteamWorks_SteamServersConnected()
+public void SteamWorks_SteamServersConnected()
 {
 	int iIp[4];
 	if (SteamWorks_GetPublicIP(iIp) && iIp[0] && iIp[1] && iIp[2] && iIp[3])
