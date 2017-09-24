@@ -14,6 +14,21 @@ functag public bool:KeyUseCallback(iClient, const String:sKeyType[], Handle:hPar
 // Прототип вызова при выводе параметров ключа
 functag public KeyPrintCallback(iClient, const String:sKeyType[], Handle:hParamsArr, String:sBuffer[], iBufLen);
 
+// Прототип вызова при проверке существования ключа
+functag public KeyCheckValidKeyCallback(const String:sKey[], bool:bKeyExists);
+
+// Прототип вызова при получении данных ключа
+functag public KeyGetDataCallback(const String:sKey[], bool:bKeyExists, const String:sKeyType[], iUses, iExpires, Handle:hParamsArr);
+
+// Прототип вызова при добавлении ключа
+functag public KeyAddCallback(iClient, const String:sKey[], bool:bSuccess, const String:sError[]);
+
+// Прототип вызова при использоании ключа игроком
+functag public KeyUseCallback(iClient, const String:sKey[], bool:bSuccess, String:sError[]);
+
+// Прототип вызова при удалении ключа
+functag public KeyRemoveCallback(const String:sKey[], bool:bSuccess);
+
 // Вызывается когда ядро было загружено
 forward Keys_OnCoreStarted();
 
@@ -22,6 +37,9 @@ native bool:Keys_IsCoreStarted();
 
 // Получает Handle базы данных
 native Handle:Keys_GetCoreDatabase();
+
+// Получает тип базы данных (false - SQLite, true - MySQL)
+native bool:Keys_GetDatabaseType();
 
 // Регистрирует тип ключей
 native bool:Keys_RegKey(const String:sKeyType[],
@@ -32,6 +50,30 @@ native bool:Keys_RegKey(const String:sKeyType[],
 // Разрегистрирует тип ключей
 native Keys_UnregKey(const String:sKeyType[]);
 
+// Проверяет существование типа ключей
+native bool:Keys_IsValidKeyType(const String:sKeyType[]);
+
+// Получает adt_array со всеми типами ключей (нужно закрывать Handle)
+native Handle:Keys_FillArrayByKeyTypes();
+
+// Проверяет существование ключа
+native Keys_IsValidKey(const String:sKey[], KeyCheckValidKeyCallback:IsValidKeyCallback);
+
+// Получает данные ключа
+native Keys_GetKeyData(const String:sKey[], KeyGetDataCallback:GetKeyDataCallback);
+
+// Генерирует ключ
+native Keys_GenerateKey(String:sBuffer[], iBufLen, const String:sTemplate[] = "");
+
+// Добавляет ключ
+native Keys_AddKey(iClient = 0, const String:sKey[] = "", const String:sKeyType[], iUses, iLifeTime, Handle:hParamsArr, KeyAddCallback:AddKeyCallback);
+
+// Удаляет ключ
+native Keys_RemoveKey(const String:sKey[], KeyRemoveCallback:RemoveKeyCallback);
+
+// Использует ключ игроком
+native Keys_UseKey(iClient, const String:sKey[], bool:bNotify, KeyUseCallback:UseKeyCallback);
+	
 // Для использования не забыть:
 // LoadTranslations("keys_core.phrases");
 stock Keys_GetTimeFromStamp(String:sBuffer[], iMaxLength, iTimeStamp, iClient = LANG_SERVER)
@@ -107,15 +149,21 @@ public SharedPlugin:__pl_keys_core=
 };
 
 #if !defined REQUIRE_PLUGIN
-<<<<<<< HEAD
-public void __pl_keys_core_SetNTVOptional()
-=======
+
 public __pl_keys_core_SetNTVOptional()
->>>>>>> 4ee67050d3fb25df6e30b26e03301ee38d46b425
 {
 	MarkNativeAsOptional("Keys_IsCoreStarted");
 	MarkNativeAsOptional("Keys_GetCoreDatabase");
+	MarkNativeAsOptional("Keys_GetDatabaseType");
 	MarkNativeAsOptional("Keys_RegKey");
 	MarkNativeAsOptional("Keys_UnregKey");
+	MarkNativeAsOptional("Keys_IsValidKeyType");
+	MarkNativeAsOptional("Keys_FillArrayByKeyTypes");
+	MarkNativeAsOptional("Keys_IsValidKey");
+	MarkNativeAsOptional("Keys_GetKeyData");
+	MarkNativeAsOptional("Keys_GenerateKey");
+	MarkNativeAsOptional("Keys_AddKey");
+	MarkNativeAsOptional("Keys_RemoveKey");
+	MarkNativeAsOptional("Keys_UseKey");
 }
 #endif

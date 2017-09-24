@@ -20,7 +20,95 @@ UTIL_ReplyToCommand(iClient, ReplySource:CmdReplySource, const String:sFormat[],
 	}
 }
 
-UTIL_ValidateKey(String:sKey[], iLength, String:sError[], iErrLen)
+bool:UTIL_CheckKey(String:sKey[], const String:sKeyType[], iLifeTime, iUses, Handle:hParamsArr, String:sError[], iErrLen, iClient = LANG_SERVER)
+{
+	decl Handle:hDataPack;
+
+	if(!GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
+	{
+		FormatEx(sError, iErrLen, "%T%T", "ERROR", iClient, "ERROR_INCORRECT_TYPE", iClient);
+		return false;
+	}
+
+	if(sKey[0])
+	{
+		if(!UTIL_ValidateKey(sKey, sError, iErrLen))
+		{
+			return false;
+		}
+	}
+
+	if(iLifeTime < 0)
+	{
+		FormatEx(sError, iErrLen, "%T%T", "ERROR", iClient, "ERROR_INCORRECT_LIFETIME", iClient);
+		return false;
+	}
+
+	if(iUses < 1)
+	{
+		FormatEx(sError, iErrLen, "%T%T", "ERROR", iClient, "ERROR_INCORRECT_USES", iClient);
+		return false;
+	}
+
+	decl Handle:hPlugin, Function:FuncOnValidateParams, bool:bResult;
+
+	SetPackPosition(hDataPack, DP_Plugin);
+	hPlugin = Handle:ReadPackCell(hDataPack);
+
+	SetPackPosition(hDataPack, DP_OnValidateCallback);
+	FuncOnValidateParams = Function:ReadPackCell(hDataPack);
+
+	sError = "unknown";
+	bResult = false;
+	Call_StartFunction(hPlugin, FuncOnValidateParams);
+	Call_PushCell(iClient);
+	Call_PushString(sKeyType);
+	Call_PushCell(hParamsArr);
+	Call_PushStringEx(SZF(sError), SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+	Call_PushCell(sizeof(sError));
+	Call_Finish(bResult);
+
+	if(!bResult)
+	{
+		FormatEx(sError, iErrLen, "%T%s", "ERROR", iClient, sError);
+		return false;
+	}
+
+	return true;
+}
+
+bool:UTIL_AddKey(const String:sKey[],
+const String:sKeyType[],
+iLifeTime,
+iExpires,
+iUses,
+Handle:hParamsArr,
+iClient,
+bool:bDuplicateErr)
+{
+	hDP = CreateDataPack();
+	WritePackCell(hDP, hParamsArr);
+	WritePackString(hDP, sKey);
+	WritePackCell(hDP, false);
+	WritePackCell(hDP, iClient);
+	WritePackCell(hDP, CmdReplySource);
+	WritePackString(hDP, sKeyType);
+	WritePackCell(hDP, iUses);
+	WritePackCell(hDP, iExpires);
+	WritePackCell(hDP, iLifeTime);
+	
+	if(!g_iServerID)
+	{
+		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s';", sKey);
+	}
+	else
+	{
+		FormatEx(SZF(sQuery), "SELECT `expires` FROM `table_keys` WHERE `key_name` = '%s' AND `sid` = %d;", sKey, g_iServerID);
+	}
+	SQL_TQuery(g_hDatabase, SQL_Callback_SearchKey, sQuery, hDP);
+}
+
+UTIL_ValidateKey(String:sKey[], String:sError[], iErrLen)
 {
 	if(!sKey[0])
 	{
@@ -28,6 +116,7 @@ UTIL_ValidateKey(String:sKey[], iLength, String:sError[], iErrLen)
 		return false;
 	}
 
+	new iLength = strlen(sKey);
 	if(iLength < 8)
 	{
 		strcopy(sError, iErrLen, "ERROR_KEY_SHORT");
@@ -60,7 +149,7 @@ UTIL_ValidateKey(String:sKey[], iLength, String:sError[], iErrLen)
 	return true;
 }
 
-UTIL_GenerateKey(String:sKey[])
+UTIL_GenerateKey(String:sKey[], iMaxLen, const String:sTemplate[] = NULL_STRING)
 {
 	sKey[0] = '\0';
 	
@@ -69,7 +158,7 @@ UTIL_GenerateKey(String:sKey[])
 	if(g_CVAR_sKeyTemplate[0])
 	{
 		new iLength = strlen(g_CVAR_sKeyTemplate);
-		while (i < iLength)
+		while (i < iLength && i < iMaxLen)
 		{
 			sKey[i] = UTIL_GetCharTemplate(g_CVAR_sKeyTemplate[i]);
 			++i;
@@ -77,7 +166,7 @@ UTIL_GenerateKey(String:sKey[])
 	}
 	else
 	{
-		while (i < g_CVAR_iKeyLength)
+		while (i < g_CVAR_iKeyLength && i < iMaxLen)
 		{
 			sKey[i] = UTIL_GetCharTemplate(0x58);
 			++i;
@@ -87,9 +176,11 @@ UTIL_GenerateKey(String:sKey[])
 	sKey[i] = '\0';
 }
 /*
-A - Буква в любом регистре\n\
-B - Цифра 0-9\n\
-X - Цифра 0-9 либо буква в любом регистре\n\
+A - Буква в любом регистре
+B - Цифра 0-9
+X - Цифра 0-9 либо буква в любом регистре
+U - число 0-9 либо буква в верхнем регистре
+L - число 0-9 либо буква в нижнем регистре
 */
 
 static const g_iNumbers[] = {0x30, 0x39};
@@ -101,17 +192,22 @@ UTIL_GetCharTemplate(iChar)
 	switch(iChar)
 	{
 		// A - буква в любом регистре
-	case 0x41:	return GetRandomInt(1, 20) > 10 ? UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]);
+		case 0x41:	return UTIL_GetRandomInt(1, 20) > 10 ? UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]);
 		// B - число 0-9
-	case 0x42:	return UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]);
+		case 0x42:	return UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]);
 		// X - число 0-9 либо буква в любом регистре
-	case 0x58:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):(GetRandomInt(1, 20) > 10 ? UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]));
+		case 0x58:	return UTIL_GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):(UTIL_GetRandomInt(1, 20) > 10 ? UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]));
 		// U - число 0-9 либо буква в верхнем регистре
-	case 0x55:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]);
+		case 0x55:	return UTIL_GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersUpper[0], g_iLettersUpper[1]);
 		// L - число 0-9 либо буква в нижнем регистре
-	case 0x4c:	return GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]);
+		case 0x4c:	return UTIL_GetRandomInt(0, 2) == 1 ? UTIL_GetRandomInt(g_iNumbers[0], g_iNumbers[1]):UTIL_GetRandomInt(g_iLettersLower[0], g_iLettersLower[1]);
+		// Символ -
+		case 0x2D:	return iChar;
 		// Другой символ
-	default:	return iChar;
+		default:
+		{
+			return UTIL_GetCharTemplate(0x58);
+		}
 	}
 
 	return iChar;

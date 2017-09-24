@@ -32,10 +32,7 @@ public OnPluginStart()
 	HookConVarChange(hCvar, OnKeyLengthChange);
 	g_CVAR_iKeyLength = GetConVarInt(hCvar);
 
-	hCvar = CreateConVar("key_template", "", "Шаблон для генерируемого пароля:\n\
-	A - Буква в любом регистре\n\
-	B - Цифра 0-9\n\
-	X - Цифра 0-9 либо буква в любом регистре\n\
+	hCvar = CreateConVar("key_template", "", "Шаблон для генерируемого ключа (Подробнее http://hlmod.ru/resources/keys-core.438/)
 	Пример: XXXX-XXXX-XXXX-XXXX", _, false, 0.0, true, 64.0);
 
 	HookConVarChange(hCvar, OnKeyTemplateChange);
@@ -130,7 +127,7 @@ CreateTables()
 								`type` VARCHAR(64) NOT NULL, \
 								`expires` INTEGER UNSIGNED NOT NULL default 0, \
 								`uses` INTEGER UNSIGNED NOT NULL default 1, \
-								`sid` INTEGER NOT NULL, \
+								`sid` INTEGER NOT NULL default 0, \
 								`param1` VARCHAR(64) NULL default NULL, \
 								`param2` VARCHAR(64) NULL default NULL, \
 								`param3` VARCHAR(64) NULL default NULL, \

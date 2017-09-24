@@ -2,7 +2,7 @@
 
 GET_CID(iClient)
 {
-	if(iClient)
+	if(iClient > 0)
 	{
 		iClient = CID(iClient);
 		if(!iClient)
@@ -13,7 +13,7 @@ GET_CID(iClient)
 		return iClient;
 	}
 	
-	return 0;
+	return iClient;
 }
 
 RegAdminCmds()
@@ -68,7 +68,7 @@ public Action:UseKey_CMD(iClient, iArgs)
 		decl String:sKey[KEYS_MAX_LENGTH], String:sQuery[512];
 		GetCmdArg(1, SZF(sKey));
 
-		if(!UTIL_ValidateKey(sKey, strlen(sKey), SZF(sQuery)))
+		if(!UTIL_ValidateKey(sKey, SZF(sQuery)))
 		{
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", sQuery);
 
@@ -282,19 +282,17 @@ public Action:AddKey_CMD(iClient, iArgs)
 		return Plugin_Handled;
 	}
 
-	decl String:sKeyType[KEYS_MAX_LENGTH], Handle:hDataPack;
-	GetCmdArg(4, SZF(sKeyType));
-
-	if(!GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
-	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_TYPE");
-		return Plugin_Handled;
-	}
-
-	decl String:sKey[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iLifeTime, iUses, iCount, bool:bGen;
+	decl Handle:hDP,
+	String:sKeyType[KEYS_MAX_LENGTH],
+	String:sParam[KEYS_MAX_LENGTH],
+	String:sError[256],
+	iLifeTime,
+	iUses,
+	iCount,
+	Handle:hParamsArr,
+	bool:bGen;
 
 	GetCmdArg(0, SZF(sKey));
-	
 	bGen = bool:(sKey[3] == 's');
 
 	if(bGen)
@@ -306,60 +304,33 @@ public Action:AddKey_CMD(iClient, iArgs)
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_AMOUNT");
 			return Plugin_Handled;
 		}
+
+		sKey[0] = 0;
 	}
 	else
 	{
 		GetCmdArg(1, SZF(sKey));
-		if(!UTIL_ValidateKey(sKey, strlen(sKey), SZF(sError)))
-		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", sError);
-			return Plugin_Handled;
-		}
 	}
+
+	GetCmdArg(4, SZF(sKeyType));
 
 	GetCmdArg(2, SZF(sParam));
 	iLifeTime = StringToInt(sParam);
-	if(iLifeTime < 0)
-	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_LIFETIME");
-		return Plugin_Handled;
-	}
 
 	GetCmdArg(3, SZF(sParam));
 	iUses = StringToInt(sParam);
-	if(iUses < 1)
-	{
-		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_INCORRECT_USES");
-		return Plugin_Handled;
-	}
-
-	decl Handle:hParamsArr, Handle:hPlugin, Function:FuncOnValidateParams, i, bool:bResult;
 
 	hParamsArr = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
 
-	for(i = 5; i <= iArgs; ++i)
+	for(new i = 5; i <= iArgs; ++i)
 	{
 		GetCmdArg(i, SZF(sParam));
 		PushArrayString(hParamsArr, sParam);
 	}
 
-	SetPackPosition(hDataPack, DP_Plugin);
-	hPlugin = Handle:ReadPackCell(hDataPack);
+	sError[0] = 0;
 
-	SetPackPosition(hDataPack, DP_OnValidateCallback);
-	FuncOnValidateParams = Function:ReadPackCell(hDataPack);
-
-	sError = "unknown";
-	bResult = false;
-	Call_StartFunction(hPlugin, FuncOnValidateParams);
-	Call_PushCell(iClient);
-	Call_PushString(sKeyType);
-	Call_PushCell(hParamsArr);
-	Call_PushStringEx(SZF(sError), SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-	Call_PushCell(sizeof(sError));
-	Call_Finish(bResult);
-
-	if(!bResult)
+	if(!UTIL_CheckKey(sKey, sKeyType, iLifeTime, iUses, hParamsArr, SZF(sError)))
 	{
 		CloseHandle(hParamsArr);
 		UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%s", "ERROR", sError);
@@ -377,7 +348,7 @@ public Action:AddKey_CMD(iClient, iArgs)
 		{
 			--iCount;
 
-			UTIL_GenerateKey(sKey);
+			UTIL_GenerateKey(SZF(sKey), g_CVAR_sKeyTemplate);
 
 			hDP = CreateDataPack();
 			WritePackCell(hDP, CloneArray(hParamsArr));
@@ -452,12 +423,24 @@ public SQL_Callback_SearchKey(Handle:hOwner, Handle:hResult, const String:sError
 		if(ReadPackCell(hDP))
 		{
 			i = GET_CID(ReadPackCell(hDP));
-			if(i != -1)
+			if(i == -2)
+			{
+				i = ReadPackCell(hDP); // CmdReplySource
+				ReadPackString(hDP, sQuery, KEYS_MAX_LENGTH);
+				i = ReadPackCell(hDP); // Uses
+				i = ReadPackCell(hDP); // Expires
+				i = ReadPackCell(hDP); // LifeTime
+
+				Format(sQuery, 256, "%T%T", "ERROR", LANG_SERVER, "ERROR_KEY_ALREADY_EXISTS", LANG_SERVER, sKey);
+				CreateCallback_AddKey(Handle:ReadPackCell(hDP), Function:ReadPackCell(hDP), sKey, false, sQuery);
+			}
+			else if(i != -1)
 			{
 				UTIL_ReplyToCommand(i, ReplySource:ReadPackCell(hDP), "%t%t", "ERROR", "ERROR_KEY_ALREADY_EXISTS", sKey);
 			}
 
 			CloseHandle(hParamsArr);
+			CloseHandle(hDP);
 			return;
 		}
 		else
@@ -465,7 +448,7 @@ public SQL_Callback_SearchKey(Handle:hOwner, Handle:hResult, const String:sError
 			decl Handle:hDP2;
 			hDP2 = CreateDataPack();
 			WritePackCell(hDP2, hParamsArr);
-			UTIL_GenerateKey(sKey);
+			UTIL_GenerateKey(SZF(sKey), g_CVAR_sKeyTemplate);
 			WritePackString(hDP2, sKey); // New Key
 			WritePackCell(hDP2, false);
 			i = ReadPackCell(hDP); // Client
@@ -523,12 +506,10 @@ public SQL_Callback_SearchKey(Handle:hOwner, Handle:hResult, const String:sError
 	if(!g_iServerID)
 	{
 		FormatEx(SZF(sQuery), "INSERT INTO `table_keys` (`key_name`, `type`, `expires`, `uses`, %s) VALUES ('%s', '%s', %d, %d, %s);", sBufferColumns, sKey, sKeyType, iExpires, iUses, sBufferValues);
-		
 	}
 	else
 	{
 		FormatEx(SZF(sQuery), "INSERT INTO `table_keys` (`key_name`, `type`, `expires`, `uses`, `sid`, %s) VALUES ('%s', '%s', %d, %d, %d, %s);", sBufferColumns, sKey, sKeyType, iExpires, iUses, g_iServerID, sBufferValues);
-		
 	}
 	SQL_TQuery(g_hDatabase, SQL_Callback_AddKey, sQuery, hDP);
 }
@@ -547,7 +528,7 @@ public SQL_Callback_AddKey(Handle:hOwner, Handle:hResult, const String:sError[],
 		return;
 	}
 
-	decl Handle:hDataPack, Handle:hPlugin, Function:fPrintCallback, String:sKey[KEYS_MAX_LENGTH], String:sKeyType[KEYS_MAX_LENGTH], String:sParams[512], String:sName[MAX_NAME_LENGTH], String:sAuth[32], String:sExpires[64], iLifeTime, iUses, iClient, ReplySource:CmdReplySource;
+	decl Handle:hDataPack, Handle:hPlugin, Function:fPrintCallback, String:sKey[KEYS_MAX_LENGTH], String:sKeyType[KEYS_MAX_LENGTH], String:sParams[512], String:sName[MAX_NAME_LENGTH], String:sAuth[32], String:sExpires[64], iLifeTime, iUses, iClient, iLangClient, ReplySource:CmdReplySource;
 	ReadPackString(hDP, SZF(sKey));
 	ReadPackCell(hDP);
 	iClient = GET_CID(ReadPackCell(hDP));
@@ -559,29 +540,32 @@ public SQL_Callback_AddKey(Handle:hOwner, Handle:hResult, const String:sError[],
 	ReadPackCell(hDP);
 	iLifeTime = ReadPackCell(hDP);
 
-	if(iClient == -1)
+	if(iClient == -2)
 	{
-		iClient = 0;
+		CreateCallback_AddKey(Handle:ReadPackCell(hDP), Function:ReadPackCell(hDP), sKey);
 	}
-	
-	if(!iClient)
-	{
-		strcopy(SZF(sName), "CONSOLE");
-		strcopy(SZF(sAuth), "STEAM_ID_SERVER");
-	}
-	else
+
+	if(iClient > 0)
 	{
 		GetClientName(iClient, SZF(sName));
 		GetClientAuthId(iClient, AuthId_Engine, SZF(sAuth));
+		iLangClient = iClient;
+	}
+	else
+	{
+		iLangClient = LANG_SERVER;
+	
+		strcopy(SZF(sName), "CONSOLE");
+		strcopy(SZF(sAuth), "STEAM_ID_SERVER");
 	}
 	
 	if(iLifeTime)
 	{
-		Keys_GetTimeFromStamp(SZF(sExpires), iLifeTime, iClient);
+		Keys_GetTimeFromStamp(SZF(sExpires), iLifeTime, iLangClient);
 	}
 	else
 	{
-		FormatEx(SZF(sExpires), "%T", "FOREVER", iClient);
+		FormatEx(SZF(sExpires), "%T", "FOREVER", iLangClient);
 	}
 	
 	sParams[0] = 0;
@@ -601,7 +585,7 @@ public SQL_Callback_AddKey(Handle:hOwner, Handle:hResult, const String:sError[],
 
 	if(SQL_GetAffectedRows(hOwner))
 	{
-		if(iClient != -1)
+		if(iClient > -1)
 		{
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t", "SUCCESS_CREATE_KEY", sKey);
 		}
@@ -610,7 +594,7 @@ public SQL_Callback_AddKey(Handle:hOwner, Handle:hResult, const String:sError[],
 	}
 	else
 	{
-		if(iClient != -1)
+		if(iClient > -1)
 		{
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_CREATE_KEY", sKey);
 		}
