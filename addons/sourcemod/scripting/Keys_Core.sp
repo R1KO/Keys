@@ -59,16 +59,16 @@ public OnPluginStart()
 
 	// init datapos
 	new Handle:hPack = CreateDataPack();
-	DP_Plugin = GetDataPackPos(hPack);
+	DP_Plugin = GetPackPosition(hPack);
 
 	WritePackCell(hPack, 0);
-	DP_OnValidateCallback = GetDataPackPos(hPack);
+	DP_OnValidateCallback = GetPackPosition(hPack);
 
 	WritePackCell(hPack, 0);
-	DP_OnUseCallback = GetDataPackPos(hPack);
+	DP_OnUseCallback = GetPackPosition(hPack);
 
 	WritePackCell(hPack, 0);
-	DP_OnPrintCallback = GetDataPackPos(hPack);
+	DP_OnPrintCallback = GetPackPosition(hPack);
 
 	CloseHandle(hPack);
 
