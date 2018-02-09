@@ -57,6 +57,21 @@ public OnPluginStart()
 
 	RegAdminCmds();
 
+	// init datapos
+	new Handle:hPack = CreateDataPack();
+	DP_Plugin = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnValidateCallback = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnUseCallback = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnPrintCallback = GetPackPosition(hPack);
+
+	CloseHandle(hPack);
+
 	Connect_DB();
 }
 
