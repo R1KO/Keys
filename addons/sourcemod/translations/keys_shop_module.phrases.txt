@@ -5,6 +5,12 @@
 		"ru"	"Неверное количество кредитов!"
 		"en"	"Wrong number of credits!"
 	}
+	
+	"ERROR_INVALID_GOLD"
+	{
+		"ru"	"Неверное количество золота!"
+		"en"	"Wrong number of gold!"
+	}
 
 	"ERROR_INVALID_CATEGORY"
 	{
@@ -22,6 +28,12 @@
 	{
 		"ru"	"Кредиты"
 		"en"	"Credits"
+	}
+
+	"GOLD"
+	{
+		"ru"	"Золото"
+		"en"	"Gold"
 	}
 
 	"CATEGORY"
@@ -53,6 +65,13 @@
 		"#format"	"{1:d}"
 		"ru"	"Вы получили {1} кредитов!"
 		"en"	"You received  {1} credits!"
+	}
+
+	"YOU_RECEIVED_GOLD"
+	{
+		"#format"	"{1:d}"
+		"ru"	"Вы получили {1} золота!"
+		"en"	"You received  {1} gold!"
 	}
 
 	"YOU_RECEIVED_ITEM_FROM_CATEGORY"
