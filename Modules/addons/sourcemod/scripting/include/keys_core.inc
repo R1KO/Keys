@@ -20,70 +20,70 @@ enum KeysNativeAction
 };
 
 // Прототип вызова при валидации параметров/акцивации/выводе параметров ключа
-typedef KeyActionCallback = function bool (KeysAction eKeysAction, int iClient, const char[] szKeyType, ArrayList hParamsArr, char[] szBuffer, int iBuffLen);
+functag public bool:KeyActionCallback(KeysAction:eKeysAction, iClient, const String:szKeyType[], Handle:hParamsArr, String:szBuffer[], iBuffLen);
 
-typeset KeyInfoCallback
+funcenum KeyInfoCallback
 {
     // Прототип вызова при проверке существования ключа
-    function void (const char[] sKey, bool bKeyExists, any iData);
+    public(const String:sKey[], bool:bKeyExists, any:iData),
  
     // Прототип вызова при получении данных ключа
-    function void (const char[] sKey, bool bKeyExists, const char[] sKeyType, int iUses, int iExpires, ArrayList hParamsArr, any iData);
+    public(const String:sKey[], bool:bKeyExists, const String:sKeyType[], iUses, iExpires, Handle:hParamsArr, any:iData)
 };
 
 // Прототип вызова при добавлении/удалении/использовании ключа
-typedef KeyNativeActionCallback = function void (KeysNativeAction eKeysAction, int iClient, const char[] sKey, bool bSuccess, const char[] sError, any iData);
+functag public KeyNativeActionCallback (KeysNativeAction:eKeysAction, iClient, const String:sKey[], bool:bSuccess, const String:sError[], any:iData);
 
 // Вызывается когда ядро было загружено
-forward void Keys_OnCoreStarted();
+forward Keys_OnCoreStarted();
 
 // Загружено ли ядро
-native bool Keys_IsCoreStarted();
+native bool:Keys_IsCoreStarted();
 
 // Получает Handle базы данных
-native Database Keys_GetCoreDatabase();
+native Handle:Keys_GetCoreDatabase();
 
 // Получает тип базы данных (false - SQLite, true - MySQL)
-native bool Keys_GetDatabaseType();
+native bool:Keys_GetDatabaseType();
 
 // Регистрирует тип ключей
-native bool Keys_RegKey(const char[] sKeyType, KeyActionCallback fCallback);
+native bool:Keys_RegKey(const String:sKeyType[], KeyActionCallback:fCallback);
 
 // Разрегистрирует тип ключей
-native void Keys_UnregKey(const char[] sKeyType);
+native Keys_UnregKey(const String:sKeyType[]);
 
 // Проверяет существование типа ключей
-native bool Keys_IsValidKeyType(const char[] sKeyType);
+native bool:Keys_IsValidKeyType(const String:sKeyType[]);
 
 // Получает adt_array со всеми типами ключей (нужно закрывать Handle)
-native ArrayList Keys_FillArrayByKeyTypes();
+native Handle:Keys_FillArrayByKeyTypes();
 
 // Проверяет существование ключа
-native void Keys_IsValidKey(const char[] sKey, KeyInfoCallback IsValidKeyCallback, any iData = 0);
+native Keys_IsValidKey(const String:sKey[], KeyInfoCallback:IsValidKeyCallback, any:iData = 0);
 
 // Получает данные ключа
-native void Keys_GetKeyData(const char[] sKey, KeyInfoCallback GetKeyDataCallback, any iData = 0);
+native Keys_GetKeyData(const String:sKey[], KeyInfoCallback:GetKeyDataCallback, any:iData = 0);
 
 // Генерирует ключ
-native void Keys_GenerateKey(char[] sBuffer, int iBufLen, const char[] sTemplate = NULL_STRING);
+native Keys_GenerateKey(String:sBuffer[], iBufLen, const String:sTemplate[] = NULL_STRING);
 
 // Добавляет ключ
-native void Keys_AddKey(int iClient = 0, const char[] sKey = NULL_STRING, const char[] sKeyType, int iUses, int iLifeTime, ArrayList hParamsArr, KeyNativeActionCallback AddKeyCallback, any iData = 0);
+native Keys_AddKey(iClient = 0, const String:sKey[] = NULL_STRING, const String:sKeyType[], iUses, iLifeTime, Handle:hParamsArr, KeyNativeActionCallback:AddKeyCallback, any:iData = 0);
 
 // Удаляет ключ
-native void Keys_RemoveKey(int iClient = 0, const char[] sKey, KeyNativeActionCallback RemoveKeyCallback, any iData = 0);
+native Keys_RemoveKey(iClient = 0, const String:sKey[], KeyNativeActionCallback:RemoveKeyCallback, any:iData = 0);
 
 // Использует ключ игроком
-native void Keys_UseKey(int iClient, const char[] sKey, bool bNotify, bool bIgnoreBlock, KeyNativeActionCallback UseKeyCallback, any iData = 0);
+native Keys_UseKey(iClient, const String:sKey[], bool:bNotify, bool:bIgnoreBlock, KeyNativeActionCallback:UseKeyCallback, any:iData = 0);
 
 // Для использования не забыть 
 // LoadTranslations("keys_core.phrases");
-stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp, int iClient = LANG_SERVER)
+stock Keys_GetTimeFromStamp(String:sBuffer[], iMaxLength, iTimeStamp, iClient = LANG_SERVER)
 {
 	if (iTimeStamp > 31536000)
 	{
-		int iYears = iTimeStamp / 31536000;
-		int i = iTimeStamp - (iYears*31536000);
+		new iYears = iTimeStamp / 31536000;
+		new i = iTimeStamp - (iYears*31536000);
 		if(i > 2592000)
 		{
 			FormatEx(sBuffer, iMaxLength, "%d %T %d %T", iYears, "YEARS", iClient, i / 2592000, "MONTHS", iClient);
@@ -97,8 +97,8 @@ stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp,
 
 	if (iTimeStamp > 2592000)
 	{
-		int iMonths = iTimeStamp / 2592000;
-		int i = iTimeStamp - (iMonths*2592000);
+		new iMonths = iTimeStamp / 2592000;
+		new i = iTimeStamp - (iMonths*2592000);
 		if (i > 86400)
 		{
 			FormatEx(sBuffer, iMaxLength, "%d %T %d %T", iMonths, "MONTHS", iClient, i / 86400, "DAYS", iClient);
@@ -112,8 +112,8 @@ stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp,
 
 	if (iTimeStamp > 86400)
 	{
-		int iDays = iTimeStamp / 86400 % 365;
-		int iHours = (iTimeStamp / 3600) % 24;
+		new iDays = iTimeStamp / 86400 % 365;
+		new iHours = (iTimeStamp / 3600) % 24;
 		if (iHours > 0)
 		{
 			FormatEx(sBuffer, iMaxLength, "%d %T %d %T", iDays, "DAYS", iClient, iHours, "HOURS", iClient);
@@ -125,9 +125,9 @@ stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp,
 		return;
 	}
 
-	int iHours = (iTimeStamp / 3600);
-	int iMins = (iTimeStamp / 60) % 60;
-	int iSecs = iTimeStamp % 60;
+	new iHours = (iTimeStamp / 3600);
+	new iMins = (iTimeStamp / 60) % 60;
+	new iSecs = iTimeStamp % 60;
 	
 	if (iHours > 0)
 	{
@@ -139,7 +139,7 @@ stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp,
 	}
 }
 
-public SharedPlugin __pl_keys_core= 
+public SharedPlugin:__pl_keys_core= 
 {
 	name = "keys_core",
 	file = "Keys_Core.smx",
@@ -152,7 +152,7 @@ public SharedPlugin __pl_keys_core=
 
 #if !defined REQUIRE_PLUGIN
 
-public void __pl_keys_core_SetNTVOptional()
+public __pl_keys_core_SetNTVOptional()
 {
 	MarkNativeAsOptional("Keys_IsCoreStarted");
 	MarkNativeAsOptional("Keys_GetCoreDatabase");
