@@ -65,10 +65,10 @@ native void Keys_IsValidKey(const char[] sKey, KeyInfoCallback IsValidKeyCallbac
 native void Keys_GetKeyData(const char[] sKey, KeyInfoCallback GetKeyDataCallback, any iData = 0);
 
 // Генерирует ключ
-native void Keys_GenerateKey(char[] sBuffer, iBufLen, const char[] sTemplate = NULL_STRING);
+native void Keys_GenerateKey(char[] sBuffer, int iBufLen, const char[] sTemplate = NULL_STRING);
 
 // Добавляет ключ
-native void Keys_AddKey(int iClient = 0, const char[] sKey = NULL_STRING, const char[] sKeyType, int iUses, iLifeTime, ArrayList hParamsArr, KeyNativeActionCallback AddKeyCallback, any iData = 0);
+native void Keys_AddKey(int iClient = 0, const char[] sKey = NULL_STRING, const char[] sKeyType, int iUses, int iLifeTime, ArrayList hParamsArr, KeyNativeActionCallback AddKeyCallback, any iData = 0);
 
 // Удаляет ключ
 native void Keys_RemoveKey(int iClient = 0, const char[] sKey, KeyNativeActionCallback RemoveKeyCallback, any iData = 0);
