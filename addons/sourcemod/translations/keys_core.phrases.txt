@@ -253,6 +253,12 @@
 		"fi"	"Olet antanut väärän avaimen! Yrityksiä jäljellä: {1}"
 	}
 
+	"ERROR_PROCESSING"
+	{
+		"en"	"Your previous key in processing. Try again."
+		"ru"	"Ваш прошлый ключ ещё в обработке. Попробуйте позже."
+	}
+
 	"FOREVER"
 	{
 		"ru"	"Навсегда"

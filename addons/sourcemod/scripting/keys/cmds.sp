@@ -57,6 +57,9 @@ public Action:UseKey_CMD(iClient, iArgs)
 				g_bIsBlocked[iClient] = false;
 				g_iAttempts[iClient] = 0;
 			}
+		} else if (g_bIsProcessing[iClient]) {
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
+			return Plugin_Handled;
 		}
 
 		if(iArgs != 1)
@@ -113,6 +116,7 @@ public Action:UseKey_CMD(iClient, iArgs)
 			FormatEx(SZF(sQuery), "SELECT `key_name`, `type`, `expires`, `uses`, CASE WHEN (SELECT `key_name` FROM `keys_players_used` WHERE `auth` = '%s' AND `key_name` = '%s') IS NULL THEN 0 ELSE 1 END AS `used`, `param1`, `param2`, `param3`, `param4`, `param5` FROM `table_keys` WHERE `key_name` = '%s' LIMIT 1;", sAuth, sKey, sKey);
 		}
 
+		g_bIsProcessing[iClient] = true;
 		SQL_TQuery(g_hDatabase, SQL_Callback_UseKey, sQuery, hDP);
 	}
 
@@ -121,6 +125,11 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[], any:hDP)
 {
+	ResetPack(hDP);
+
+	new iClient = CID(ReadPackCell(hDP));
+	g_bIsProcessing[iClient] = false;
+
 	if (hResult == INVALID_HANDLE || sDBError[0])
 	{
 		CloseHandle(hDP);
@@ -128,9 +137,6 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 		return;
 	}
 	
-	ResetPack(hDP);
-
-	new iClient = CID(ReadPackCell(hDP));
 	new ReplySource:CmdReplySource = ReplySource:ReadPackCell(hDP);
 	CloseHandle(hDP);
 

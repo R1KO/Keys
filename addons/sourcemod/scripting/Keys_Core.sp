@@ -327,6 +327,7 @@ public OnClientDisconnect(iClient)
 {
 	g_iAttempts[iClient] = 0;
 	g_bIsBlocked[iClient] = false;
+	g_bIsProcessing[iClient] = false;
 }
 
 public OnClientPostAdminCheck(iClient)
