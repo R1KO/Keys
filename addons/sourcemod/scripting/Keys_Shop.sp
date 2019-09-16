@@ -64,7 +64,7 @@ public bool:OnKeyParamsValidate(iClient, const String:sKeyType[], Handle:hParams
 
 		return true;
 	}
-	else if (!strcmp(sKeyType, g_sKeyType[2]))
+	if (!strcmp(sKeyType, g_sKeyType[2]))
 	{
 		if(GetArraySize(hParamsArr) != 1)
 		{
@@ -226,7 +226,7 @@ public OnKeyPrint(iClient, const String:sKeyType[], Handle:hParamsArr, String:sB
 		FormatEx(sBuffer, iBufLen, "%T: %s", "CREDITS", iClient, sParam);
 		return;
 	}
-	else if(!strcmp(sKeyType, g_sKeyType[2]))
+	if(!strcmp(sKeyType, g_sKeyType[2]))
 	{
 		FormatEx(sBuffer, iBufLen, "%T: %s", "GOLD", iClient, sParam);
 		return;
