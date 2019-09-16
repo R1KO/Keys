@@ -32,16 +32,14 @@ public OnPluginStart()
 
 public OnPluginEnd()
 {
-	Keys_UnregKey(g_sKeyType[0]);
-	Keys_UnregKey(g_sKeyType[1]);
-	Keys_UnregKey(g_sKeyType[2]);
+	for (int i = 0; i < sizeof(g_sKeyType); ++i)
+		Keys_UnregKey(g_sKeyType[i]);
 }
 
 public Keys_OnCoreStarted()
 {
-	Keys_RegKey(g_sKeyType[0], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
-	Keys_RegKey(g_sKeyType[1], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
-	Keys_RegKey(g_sKeyType[2], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
+	for (int i = 0; i < sizeof(g_sKeyType); ++i)
+		Keys_RegKey(g_sKeyType[i], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
 }
 
 public bool:OnKeyParamsValidate(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen)
@@ -118,13 +116,12 @@ GiveClientItem(iClient, ItemId:iItemID)
 	{
 		Shop_GiveClientItem(iClient, iItemID);
 		Shop_SetClientItemTimeleft(iClient, iItemID, Shop_GetItemValue(iItemID));
+		return;
 	}
-	else
-	{
-		new iPrice = Shop_GetItemPrice(iItemID);
-		Shop_GiveClientCredits(iClient, iPrice, IGNORE_FORWARD_HOOK);
-		Shop_BuyClientItem(iClient, iItemID);
-	}
+
+	new iPrice = Shop_GetItemPrice(iItemID);
+	Shop_GiveClientCredits(iClient, iPrice, IGNORE_FORWARD_HOOK);
+	Shop_BuyClientItem(iClient, iItemID);
 }
 
 public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen)
@@ -137,8 +134,14 @@ public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String
 		PrintToChat(iClient, "%t%t", "CHAT_PREFIX", "YOU_RECEIVED_CREDITS", StringToInt(sParam));
 		return true;
 	}
-	else if(!strcmp(sKeyType, g_sKeyType[2]))
+
+	if(!strcmp(sKeyType, g_sKeyType[2]))
 	{
+		if ((GetFeatureStatus(FeatureType_Native, "Shop_GiveClientGold") != FeatureStatus_Available)
+		{
+			FormatEx(sError, iErrLen, "Native Shop_GiveClientGold is not available!");
+			return false;
+		}
 		Shop_GiveClientGold(iClient, StringToInt(sParam), IGNORE_FORWARD_HOOK);
 		PrintToChat(iClient, "%t%t", "CHAT_PREFIX", "YOU_RECEIVED_GOLD", StringToInt(sParam));
 		return true;
