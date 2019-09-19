@@ -318,26 +318,26 @@
 	}
 	"YEARS"
 	{
-		"en"		"y."
 		"ru"		"г."
 		"uk"		"р."
+		"en"		"y."
 	}
 	"MONTHS"
 	{
-		"en"		"mo."
 		"ru"		"мес."
 		"uk"		"міс."
+		"en"		"mo."
 	}
 	"DAYS"
 	{
-		"en"		"d."
 		"ru"		"д."
 		"uk"		"д."
+		"en"		"d."
 	}
 	"HOURS"
 	{
-		"en"		"h."
 		"ru"		"ч."
 		"uk"		"г."
+		"en"		"h."
 	}
 }
