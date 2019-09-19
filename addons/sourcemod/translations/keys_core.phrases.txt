@@ -258,7 +258,6 @@
 		"en"	"An error occurred while deleting keys (type: {1}) by player {1} ({2})!"
 	}
 
-	// И тут я рыдаю :c
 	"ERROR_LIST_NO_KEYS"
 	{
 		"ru"	"Нет ни одного ключа!"
