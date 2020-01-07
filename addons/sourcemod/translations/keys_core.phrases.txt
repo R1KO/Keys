@@ -3,16 +3,19 @@
 	"USAGE_ERROR_USE_KEY"
 	{
 		"ru"	"Используйте: key/usekey <ключ>"
+		"uk"	"Використовуйте: key/usekey <ключ>"
 		"en"	"Usage: key/usekey <key>"
 	}
 	"USAGE_ERROR_ADD_KEY"
 	{
 		"ru"	"Используйте: key_create/key_add <ключ> <время жизни> <количество использований> <тип> <параметры>"
+		"uk"	"Використовуйте: key_create/key_add <ключ> <час життя> <кількість використань> <тип> <параметри>"
 		"en"	"Usage: key_create/key_add <key> <lifetime> <number of uses> <type> <params>"
 	}
 	"USAGE_ERROR_GEN_KEYS"
 	{
 		"ru"	"Используйте: keys_gen <количество> <время жизни> <количество использований> <тип> <параметры>"
+		"uk"	"Використовуйте: keys_gen <кількість> <час життя> <кількість використань> <тип> <параметри>"
 		"en"	"Usage: keys_gen <amount> <lifetime> <number of uses> <type> <params>"
 	}
 
@@ -20,6 +23,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Вы успешно использовали ключ: {1}!"
+		"uk"	"Ви успішно використали ключ: {1}!"
 		"en"	"You have successfully used the key: {1}!"
 	}
 
@@ -27,18 +31,21 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"ru"	"Игрок {1} ({2}) использовал ключ {3}"
+		"uk"	"Гравець {1} ({2}) використав ключ {3}"
 		"en"	"Player {1} ({2}) used the key {3}"
 	}
 
 	"ERROR"
 	{
 		"ru"	"ОШИБКА: "
+		"uk"	"Помилка: "
 		"en"	"ERROR: "
 	}
 
 	"ERROR_KEY_NOT_EXIST"
 	{
 		"ru"	"Ключ не существует!"
+		"uk"	"Ключ не існує!"
 		"en"	"The key does not exist!"
 		"fi"	"Avain ei ole olemassa!"
 	}
@@ -46,18 +53,21 @@
 	"ERROR_KEY_ALREADY_USED"
 	{
 		"ru"	"Вы уже использовали этот ключ!"
+		"uk"	"Ви вже використали цей ключ!"
 		"en"	"You have already used this key!"
 	}
 
 	"ERROR_NUM_ARGS"
 	{
 		"ru"	"Неверное количество аргументов!"
+		"uk"	"Невірна кількість аргументів!"
 		"en"	"Wrong number of arguments!"
 	}
 
 	"ERROR_INCORRECT_TYPE"
 	{
 		"ru"	"Неверный тип ключа!"
+		"uk"	"Невірний тип ключа!"
 		"en"	"Invalid key type!"
 	}
 
@@ -65,18 +75,21 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ключ {1} уже существует!"
+		"uk"	"Ключ {1} уже існує!"
 		"en"	"Key {1} already exists!"
 	}
 
 	"ERROR_INCORRECT_KEY"
 	{
 		"ru"	"Некорректный ключ!"
+		"uk"	"Некоректний ключ!"
 		"en"	"Incorrect key!"
 	}
 
 	"ERROR_INCORRECT_TIME"
 	{
 		"ru"	"Неверное время!"
+		"uk"	"Невірний час!"
 		"en"	"Incorrect time!"
 		"fi"	"VIRHE: Väärä aika!"
 	}
@@ -84,6 +97,7 @@
 	"ERROR_INCORRECT_AMOUNT"
 	{
 		"ru"	"Неверное количество!"
+		"uk"	"Невірна кількість!"
 		"en"	"Incorrect amount!"
 		"fi"	"VIRHE: Väärä määrä!"
 	}
@@ -91,24 +105,28 @@
 	"ERROR_KEY_EMPTY"
 	{
 		"ru"	"Ключ пустой!"
+		"uk"	"Ключ пустий!"
 		"en"	"The key is empty!"
 	}
 
 	"ERROR_KEY_SHORT"
 	{
 		"ru"	"Ключ слишком короткий!"
+		"uk"	"Ключ занадто короткий!"
 		"en"	"The key is too short!"
 	}
 
 	"ERROR_KEY_LONG"
 	{
 		"ru"	"Ключ слишком длинный!"
+		"uk"	"Ключ занадто довгий!"
 		"en"	"The key is too long!"
 	}
 
 	"ERROR_KEY_INVALID_CHARACTERS"
 	{
 		"ru"	"Ключ содержит запрещенные символы!"
+		"uk"	"Ключ містить заборонені символи!"
 		"en"	"The key contains illegal characters!"
 	}
 
@@ -116,6 +134,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ключ {1} успешно добавлен!"
+		"uk"	"Ключ {1} успішно додано!"
 		"en"	"The key {1} successfully added!"
 		"fi"	"Avain {1} onnistuneesti lisätty!"
 	}
@@ -124,6 +143,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ошибка добавления ключа {1}"
+		"uk"	"Помилка додавання ключа {1}"
 		"en"	"Error adding key {1}"
 	}
 
@@ -131,6 +151,7 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s},{4:s},{5:i},{6:s},{7:s}"
 		"ru"	"Игрок {1} ({2}) добавил ключ {3} (Время жизни: {4}, Количество использований: {5}, Тип: {6}, {7})"
+		"uk"	"Гравець {1} ({2}) додав ключ {3} (Час життя: {4}, Кількість використань: {5}, Тип: {6}, {7})"
 		"en"	"Player {1} ({2}) added key {3} (Lifetime: {4}, Number of uses: {5}, Type: {6}, {7})"
 	}
 
@@ -138,6 +159,7 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s},{4:s},{5:i},{6:s},{7:s}"
 		"ru"	"Ошибка добавления ключа {1} (Игрок {2} ({3}), Время жизни: {4}, Количество использований: {5}, Тип: {6}, {7})"
+		"uk"	"Помилка додавання ключа {1} (Гравець {2} ({3}), Час життя: {4}, Кількість використань: {5}, Тип: {6}, {7})"
 		"en"	"Error adding key {1} (Player {2} ({3}), Life time: {4}, Number of uses: {5}, Type: {6}, {7})"
 	}
 
@@ -145,6 +167,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ключ {1} успешно удален!"
+		"uk"	"Ключ {1} успішно видалено!"
 		"en"	"Key {1} deleted successfully!"
 		"fi"	"Avain {1} poistettu onnistuneesti!"
 	}
@@ -153,6 +176,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ошибка удаления ключа {1}"
+		"uk"	"Помилка видалення ключа {1}"
 		"en"	"Error removing key {1}"
 	}
 
@@ -160,6 +184,7 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"ru"	"Ключ {1} успешно удален игроком {2} ({3})!"
+		"uk"	"Ключ {1} успішно видалено гравцем {2} ({3})!"
 		"en"	"The key {1} was successfully deleted by the player {2} ({3})!"
 	}
 	
@@ -167,12 +192,14 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"ru"	"Ошибка удаления ключа {1} игроком {2} ({3})!"
+		"uk"	"Помилка видалення ключа {1} гравцем {2} ({3})!"
 		"en"	"Error removing key {1} by player {2} ({3})!"
 	}
 
 	"SUCCESS_REMOVE_KEYS"
 	{
 		"ru"	"Ключи успешно удалены!"
+		"uk"	"Ключі успішно видалені!"
 		"en"	"Keys deleted successfully!"
 	}
 
@@ -180,12 +207,14 @@
 	{
 		"#format"	"{1:s},{2:s}"
 		"ru"	"Ключи успешно удалены игроком {1} ({2})!"
+		"uk"	"Ключі успішно видалені гравцем {1} ({2})!"
 		"en"	"Keys were successfully deleted by player {1} ({2})!"
 	}
 
 	"ERROR_REMOVE_KEYS"
 	{
 		"ru"	"Ошибка удаления ключей"
+		"uk"	"Помилка видалення ключів"
 		"en"	"Error removing keys"
 	}
 
@@ -193,6 +222,7 @@
 	{
 		"#format"	"{1:s},{2:s}"
 		"ru"	"Ошибка удаления ключей игроком {1} ({2})!"
+		"uk"	"Помилка видалення ключів гравцем {1} ({2})!"
 		"en"	"Key removal error by player {1} ({2})!"
 	}
 
@@ -200,6 +230,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Ключи (тип: {1}) успешно удален!"
+		"uk"	"Ключі (тип: {1}) успішно видалені!"
 		"en"	"Keys (type: {1}) deleted successfully!"
 	}
 
@@ -207,6 +238,7 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"ru"	"Ключи (тип: {1}) успешно удалены игроком {1} ({2})!"
+		"uk"	"Ключі (тип: {1}) успішно видалені гравцем {1} ({2})!"
 		"en"	"Keys (type: {1}) were successfully deleted by player {1} ({2})!"
 	}
 	
@@ -214,6 +246,7 @@
 	{
 		"#format"	"{1:s}"
 		"ru"	"Произошла ошибка при удалении ключей (тип: {1})"
+		"uk"	"Виникла помилка під час видалення ключів (тип: {1})"
 		"en"	"An error occurred while deleting the keys (type: {1})"
 	}
 	
@@ -221,12 +254,14 @@
 	{
 		"#format"	"{1:s},{2:s},{3:s}"
 		"ru"	"Произошла ошибка при удалении ключей (тип: {1}) игроком {1} ({2})!"
+		"uk"	"Виникла помилка під час видалення ключів (тип: {1}) гравцем {1} ({2})!"
 		"en"	"An error occurred while deleting keys (type: {1}) by player {1} ({2})!"
 	}
-	
+
 	"ERROR_LIST_NO_KEYS"
 	{
 		"ru"	"Нет ни одного ключа!"
+		"uk"	"Немає жодного ключа!"
 		"en"	"No Keys!"
 		"fi"	"Ei ole yhtään avainta!"
 	}
@@ -234,6 +269,7 @@
 	"ERROR_BLOCKED"
 	{
 		"ru"	"Вы были заблокированы и не можете использовать ключи!"
+		"uk"	"Ви були заблоковані та не можете використовувати ключі!"
 		"en"	"You have been blocked and can not use keys!"
 		"fi"	"Sinut on estetty etkä voi käyttää avaimia!"
 	}
@@ -242,6 +278,7 @@
 	{
 		"#format"	"{1:s},{2:s}"
 		"ru"	"Игрок {1} ({2}) был заблокирован за попытку подбора ключа"
+		"uk"	"Гравець {1} ({2}) був заблокований за спробу підбору ключа"
 		"en"	"Player {1} ({2}) was blocked for attempting to select the key"
 	}
 
@@ -249,6 +286,7 @@
 	{
 		"#format"	"{1:i}"
 		"ru"	"Вы ввели неверный ключ! Осталось попыток: {1}"
+		"uk"	"Ви ввели невірний ключ! Залишилось спроб: {1}"
 		"en"	"You have entered incorrect key! Attempts remaining: {1}"
 		"fi"	"Olet antanut väärän avaimen! Yrityksiä jäljellä: {1}"
 	}
@@ -262,41 +300,49 @@
 	"FOREVER"
 	{
 		"ru"	"Навсегда"
+		"uk"	"Назавжди"
 		"en"	"Forever"
 	}
 	"EXPIRES"
 	{
 		"ru"	"Истекает"
+		"uk"	"Закінчується"
 		"en"	"Expires"
 	}
 	"USAGE_LEFT"
 	{
 		"ru"	"Использований осталось"
+		"uk"	"Використань залишилось"
 		"en"	"Usage left"
 	}
 	"TYPE"
 	{
 		"ru"	"Тип"
+		"uk"	"Тип"
 		"en"	"Type"
 	}
 	"YEARS"
 	{
-		"en"		"y."
 		"ru"		"г."
+		"uk"		"р."
+		"en"		"y."
 	}
 	"MONTHS"
 	{
-		"en"		"mo."
 		"ru"		"мес."
+		"uk"		"міс."
+		"en"		"mo."
 	}
 	"DAYS"
 	{
-		"en"		"d."
 		"ru"		"д."
+		"uk"		"д."
+		"en"		"d."
 	}
 	"HOURS"
 	{
-		"en"		"h."
 		"ru"		"ч."
+		"uk"		"г."
+		"en"		"h."
 	}
 }

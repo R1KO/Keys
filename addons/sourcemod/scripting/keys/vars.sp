@@ -3,10 +3,10 @@
 #define CID(%0) 	GetClientOfUserId(%0)
 #define SZF(%0) 	%0, sizeof(%0)
 
-#define DP_Plugin						0
-#define DP_OnValidateCallback		9
-#define DP_OnUseCallback			18
-#define DP_OnPrintCallback			27
+new DP_Plugin;
+new DP_OnValidateCallback;
+new DP_OnUseCallback;
+new DP_OnPrintCallback;
 
 new String:g_sLogFile[256];
 

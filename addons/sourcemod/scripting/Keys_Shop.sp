@@ -15,11 +15,12 @@ public Plugin:myinfo =
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
 {
 	MarkNativeAsOptional("Shop_GiveClientItem");
+	MarkNativeAsOptional("Shop_GiveClientGold");
 
 	return APLRes_Success; 
 }
 
-new const String:g_sKeyType[][] = {"shop_credits", "shop_item"};
+new const String:g_sKeyType[][] = {"shop_credits", "shop_item", "shop_gold"};
 
 public OnPluginStart()
 {
@@ -31,14 +32,14 @@ public OnPluginStart()
 
 public OnPluginEnd()
 {
-	Keys_UnregKey(g_sKeyType[0]);
-	Keys_UnregKey(g_sKeyType[1]);
+	for (int i = 0; i < sizeof(g_sKeyType); ++i)
+		Keys_UnregKey(g_sKeyType[i]);
 }
 
 public Keys_OnCoreStarted()
 {
-	Keys_RegKey(g_sKeyType[0], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
-	Keys_RegKey(g_sKeyType[1], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
+	for (int i = 0; i < sizeof(g_sKeyType); ++i)
+		Keys_RegKey(g_sKeyType[i], OnKeyParamsValidate, OnKeyUse, OnKeyPrint);
 }
 
 public bool:OnKeyParamsValidate(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen)
@@ -56,6 +57,23 @@ public bool:OnKeyParamsValidate(iClient, const String:sKeyType[], Handle:hParams
 		if(StringToInt(sParam) < 1)
 		{
 			FormatEx(sError, iErrLen, "%T", "ERROR_INVALID_CREDITS", iClient);
+			return false;
+		}
+
+		return true;
+	}
+	if (!strcmp(sKeyType, g_sKeyType[2]))
+	{
+		if(GetArraySize(hParamsArr) != 1)
+		{
+			FormatEx(sError, iErrLen, "%T", "ERROR_NUM_ARGS", iClient);
+			return false;
+		}
+
+		GetArrayString(hParamsArr, 0, sParam, sizeof(sParam));
+		if(StringToInt(sParam) < 1)
+		{
+			FormatEx(sError, iErrLen, "%T", "ERROR_INVALID_GOLD", iClient);
 			return false;
 		}
 
@@ -97,17 +115,13 @@ GiveClientItem(iClient, ItemId:iItemID)
 	if(CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "Shop_GiveClientItem") == FeatureStatus_Available)
 	{
 		Shop_GiveClientItem(iClient, iItemID);
-		if(strcmp(SHOP_VERSION, "2.0.24") != 0)
-		{
-			Shop_SetClientItemTimeleft(iClient, iItemID, Shop_GetItemValue(iItemID));
-		}
+		Shop_SetClientItemTimeleft(iClient, iItemID, Shop_GetItemValue(iItemID));
+		return;
 	}
-	else
-	{
-		new iPrice = Shop_GetItemPrice(iItemID);
-		Shop_GiveClientCredits(iClient, iPrice, IGNORE_FORWARD_HOOK);
-		Shop_BuyClientItem(iClient, iItemID);
-	}
+
+	new iPrice = Shop_GetItemPrice(iItemID);
+	Shop_GiveClientCredits(iClient, iPrice, IGNORE_FORWARD_HOOK);
+	Shop_BuyClientItem(iClient, iItemID);
 }
 
 public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen)
@@ -118,6 +132,18 @@ public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String
 	{
 		Shop_GiveClientCredits(iClient, StringToInt(sParam), IGNORE_FORWARD_HOOK);
 		PrintToChat(iClient, "%t%t", "CHAT_PREFIX", "YOU_RECEIVED_CREDITS", StringToInt(sParam));
+		return true;
+	}
+
+	if(!strcmp(sKeyType, g_sKeyType[2]))
+	{
+		if ((GetFeatureStatus(FeatureType_Native, "Shop_GiveClientGold") != FeatureStatus_Available)
+		{
+			FormatEx(sError, iErrLen, "Native Shop_GiveClientGold is not available!");
+			return false;
+		}
+		Shop_GiveClientGold(iClient, StringToInt(sParam), IGNORE_FORWARD_HOOK);
+		PrintToChat(iClient, "%t%t", "CHAT_PREFIX", "YOU_RECEIVED_GOLD", StringToInt(sParam));
 		return true;
 	}
 
@@ -166,7 +192,7 @@ public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String
 	hArray = Shop_CreateArrayOfItems(iSize);
 	for (i = 0; i < iSize; ++i)
 	{
-		iItemID = Shop_GetArrayItem(hArray, i);
+		iItemID = Shop_GetArrayItem(view_as<ArrayList>(hArray), i);
 		if(Shop_GetItemCategoryId(iItemID) == iCatID)
 		{
 			switch(Shop_GetItemType(iItemID))
@@ -201,6 +227,11 @@ public OnKeyPrint(iClient, const String:sKeyType[], Handle:hParamsArr, String:sB
 	if(!strcmp(sKeyType, g_sKeyType[0]))
 	{
 		FormatEx(sBuffer, iBufLen, "%T: %s", "CREDITS", iClient, sParam);
+		return;
+	}
+	if(!strcmp(sKeyType, g_sKeyType[2]))
+	{
+		FormatEx(sBuffer, iBufLen, "%T: %s", "GOLD", iClient, sParam);
 		return;
 	}
 
