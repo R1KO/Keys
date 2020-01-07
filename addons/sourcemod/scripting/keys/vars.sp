@@ -28,4 +28,4 @@ new String:g_CVAR_sKeyTemplate[64];
 new g_CVAR_iAttempts;
 new g_CVAR_iBlockTime;
 
-new bool:g_bIsProcessing[MAXPLAYERS+1];
+new Handle:g_hKeysInProcessing;
