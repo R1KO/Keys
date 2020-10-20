@@ -11,7 +11,8 @@ UTIL_ReplyToCommand(iClient, ReplySource:CmdReplySource, const String:sFormat[],
 		switch(CmdReplySource)
 		{
 		case SM_REPLY_TO_CONSOLE:	PrintToConsole(iClient, "[KEYS] %s", sBuffer);
-		case SM_REPLY_TO_CHAT:		PrintToChat(iClient, GetEngineVersion() == Engine_CSGO ? " \x04[KEYS] \x01%s":"\x04[KEYS] \x01%s", sBuffer);
+		// case SM_REPLY_TO_CHAT:		PrintToChat(iClient, GetEngineVersion() == Engine_CSGO ? " \x04[KEYS] \x01%s":"\x04[KEYS] \x01%s", sBuffer);
+		case SM_REPLY_TO_CHAT:		PrintToChat(iClient, GetEngineVersion() == Engine_CSGO ? " %t \x01%s":"%t \x01%s", "CHAT_PREFIX", sBuffer);
 		}	
 	}
 	else

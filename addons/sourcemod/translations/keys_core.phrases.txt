@@ -1,5 +1,11 @@
 "Phrases"
 {
+	"CHAT_PREFIX"
+	{
+		"ru"	"[KEYS]"
+		"uk"	"[KEYS]"
+		"en"	"[KEYS]"
+	}
 	"USAGE_ERROR_USE_KEY"
 	{
 		"ru"	"Используйте: key/usekey <ключ>"
@@ -294,7 +300,8 @@
 	"ERROR_PROCESSING"
 	{
 		"en"	"Your previous key in processing. Try again."
-		"ru"	"Ваш прошлый ключ ещё в обработке. Попробуйте позже."
+		"ru"	"Ключ в обработке. Попробуйте позже."
+		"uk"	"Ключ в обробці. Спробуйте пізніше."
 	}
 
 	"FOREVER"

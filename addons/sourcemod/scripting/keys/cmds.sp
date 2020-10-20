@@ -58,11 +58,6 @@ public Action:UseKey_CMD(iClient, iArgs)
 				g_iAttempts[iClient] = 0;
 			}
 		}
-		if (g_bIsProcessing[iClient])
-		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
-			return Plugin_Handled;
-		}
 
 		if(iArgs != 1)
 		{
@@ -72,12 +67,6 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 		decl String:sKey[KEYS_MAX_LENGTH], String:sQuery[512];
 		GetCmdArg(1, SZF(sKey));
-
-		if (FindStringInArray(g_hProcessingKeysArray, sKey) != -1)
-		{
-			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
-			return Plugin_Handled;
-		}
 
 		if(!UTIL_ValidateKey(sKey, strlen(sKey), SZF(sQuery)))
 		{
@@ -102,15 +91,11 @@ public Action:UseKey_CMD(iClient, iArgs)
 			return Plugin_Handled;
 		}
 
-<<<<<<< HEAD
-		PushArrayString(g_hProcessingKeysArray, sKey);
-=======
 		if (FindStringInArray(g_hKeysInProcessing, sKey) != -1)
 		{
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
 			return Plugin_Handled;
 		}
->>>>>>> cc8d78079a2d3763c81b79b184dfeb1b7b92156d
 
 		decl Handle:hDP, String:sAuth[32];
 		hDP = CreateDataPack();
@@ -146,28 +131,14 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 {
 	ResetPack(hDP);
 
-<<<<<<< HEAD
 	decl String:sKey[KEYS_MAX_LENGTH], iClient;
 	ReadPackString(hDP, SZF(sKey));
 
-	iClient = FindStringInArray(g_hProcessingKeysArray, sKey);
+	iClient = FindStringInArray(g_hKeysInProcessing, sKey);
 	if (iClient != -1)
 	{
-		RemoveFromArray(g_hProcessingKeysArray, iClient);
+		RemoveFromArray(g_hKeysInProcessing, iClient);
 	}
-
-	iClient = CID(ReadPackCell(hDP));
-	g_bIsProcessing[iClient] = false;
-=======
-	new String:sKey[KEYS_MAX_LENGTH];
-	ReadPackString(hDP, sKey, sizeof(sKey));
-
-	new iKeyIdx = FindStringInArray(g_hKeysInProcessing, sKey);
-	if (iKeyIdx != -1)
-	{
-		RemoveFromArray(g_hKeysInProcessing, iKeyIdx);
-	}
->>>>>>> cc8d78079a2d3763c81b79b184dfeb1b7b92156d
 
 	if (hResult == INVALID_HANDLE || sDBError[0])
 	{
@@ -176,7 +147,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 		return;
 	}
 	
-	new iClient = CID(ReadPackCell(hDP));
+	iClient = CID(ReadPackCell(hDP));
 	new ReplySource:CmdReplySource = ReplySource:ReadPackCell(hDP);
 	CloseHandle(hDP);
 
@@ -189,10 +160,6 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 			if(GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
 			{
 				decl Handle:hPlugin, Function:fUseCallback, Handle:hParamsArr, String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i, bool:bResult;
-<<<<<<< HEAD
-				SQL_FetchString(hResult, 0, SZF(sKey));
-=======
->>>>>>> cc8d78079a2d3763c81b79b184dfeb1b7b92156d
 
 				iExpires = SQL_FetchInt(hResult, 2);
 				if(iExpires)
