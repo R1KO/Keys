@@ -91,8 +91,15 @@ public Action:UseKey_CMD(iClient, iArgs)
 			return Plugin_Handled;
 		}
 
+		if (FindStringInArray(g_hKeysInProcessing, sKey) != -1)
+		{
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
+			return Plugin_Handled;
+		}
+
 		decl Handle:hDP, String:sAuth[32];
 		hDP = CreateDataPack();
+		WritePackString(hDP, sKey);
 		WritePackCell(hDP, UID(iClient));
 		WritePackCell(hDP, CmdReplySource);
 
@@ -113,6 +120,7 @@ public Action:UseKey_CMD(iClient, iArgs)
 			FormatEx(SZF(sQuery), "SELECT `key_name`, `type`, `expires`, `uses`, CASE WHEN (SELECT `key_name` FROM `keys_players_used` WHERE `auth` = '%s' AND `key_name` = '%s') IS NULL THEN 0 ELSE 1 END AS `used`, `param1`, `param2`, `param3`, `param4`, `param5` FROM `table_keys` WHERE `key_name` = '%s' LIMIT 1;", sAuth, sKey, sKey);
 		}
 
+		PushArrayString(g_hKeysInProcessing, sKey);
 		SQL_TQuery(g_hDatabase, SQL_Callback_UseKey, sQuery, hDP);
 	}
 
@@ -121,6 +129,17 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[], any:hDP)
 {
+	ResetPack(hDP);
+
+	new String:sKey[KEYS_MAX_LENGTH];
+	ReadPackString(hDP, sKey, sizeof(sKey));
+
+	new iKeyIdx = FindStringInArray(g_hKeysInProcessing, sKey);
+	if (iKeyIdx != -1)
+	{
+		RemoveFromArray(g_hKeysInProcessing, iKeyIdx);
+	}
+
 	if (hResult == INVALID_HANDLE || sDBError[0])
 	{
 		CloseHandle(hDP);
@@ -128,8 +147,6 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 		return;
 	}
 	
-	ResetPack(hDP);
-
 	new iClient = CID(ReadPackCell(hDP));
 	new ReplySource:CmdReplySource = ReplySource:ReadPackCell(hDP);
 	CloseHandle(hDP);
@@ -142,8 +159,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 			SQL_FetchString(hResult, 1, SZF(sKeyType));
 			if(GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
 			{
-				decl Handle:hPlugin, Function:fUseCallback, Handle:hParamsArr, String:sKey[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i, bool:bResult;
-				SQL_FetchString(hResult, 0, SZF(sKey));
+				decl Handle:hPlugin, Function:fUseCallback, Handle:hParamsArr, String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i, bool:bResult;
 
 				iExpires = SQL_FetchInt(hResult, 2);
 				if(iExpires)

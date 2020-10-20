@@ -57,6 +57,8 @@ public OnPluginStart()
 
 	RegAdminCmds();
 
+	g_hKeysInProcessing = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
+
 	// init datapos
 	new Handle:hPack = CreateDataPack();
 	DP_Plugin = GetPackPosition(hPack);
