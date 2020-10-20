@@ -6,35 +6,35 @@
 #define KEYS_MAX_LENGTH		64
 
 // Прототип вызова при валидации параметров ключа
-typedef KeyParamsValidateCallback = function bool (int iClient, const char[] sKeyType, ArrayList hParamsArr, char[] sError, int iErrLen);
+functag public bool:KeyParamsValidateCallback(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen);
 
 // Прототип вызова при акцивации ключа
-typedef KeyUseCallback = function bool (int iClient, const char[] sKeyType, ArrayList hParamsArr, char[] sError, int iErrLen);
+functag public bool:KeyUseCallback(iClient, const String:sKeyType[], Handle:hParamsArr, String:sError[], iErrLen);
 
 // Прототип вызова при выводе параметров ключа
-typedef KeyPrintCallback = function void (int iClient, const char[] sKeyType, ArrayList hParamsArr, char[] sBuffer, int iBufLen);
+functag public KeyPrintCallback(iClient, const String:sKeyType[], Handle:hParamsArr, String:sBuffer[], iBufLen);
 
 // Вызывается когда ядро было загружено
-forward void Keys_OnCoreStarted();
+forward Keys_OnCoreStarted();
 
 // Загружено ли ядро
-native bool Keys_IsCoreStarted();
+native bool:Keys_IsCoreStarted();
 
 // Получает Handle базы данных
-native Database Keys_GetCoreDatabase();
+native Handle:Keys_GetCoreDatabase();
 
 // Регистрирует тип ключей
-native bool Keys_RegKey(const char[] sKeyType,
-					KeyParamsValidateCallback OnKeyParamsValidate,
-					KeyUseCallback OnKeyUse,
-					KeyPrintCallback OnKeyPrint);
+native bool:Keys_RegKey(const String:sKeyType[],
+					KeyParamsValidateCallback:OnKeyParamsValidate,
+					KeyUseCallback:OnKeyUse,
+					KeyPrintCallback:OnKeyPrint);
 
 // Разрегистрирует тип ключей
-native void Keys_UnregKey(const char[] sKeyType);
+native Keys_UnregKey(const String:sKeyType[]);
 
 // Для использования не забыть:
 // LoadTranslations("keys_core.phrases");
-stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp, int iClient = LANG_SERVER)
+stock Keys_GetTimeFromStamp(String:sBuffer[], iMaxLength, iTimeStamp, iClient = LANG_SERVER)
 {
 	if (iTimeStamp > 31536000)
 	{
@@ -95,7 +95,7 @@ stock void Keys_GetTimeFromStamp(char[] sBuffer, int iMaxLength, int iTimeStamp,
 	}
 }
 
-public SharedPlugin __pl_keys_core= 
+public SharedPlugin:__pl_keys_core= 
 {
 	name = "keys_core",
 	file = "Keys_Core.smx",
@@ -107,7 +107,7 @@ public SharedPlugin __pl_keys_core=
 };
 
 #if !defined REQUIRE_PLUGIN
-public void __pl_keys_core_SetNTVOptional()
+public __pl_keys_core_SetNTVOptional()
 {
 	MarkNativeAsOptional("Keys_IsCoreStarted");
 	MarkNativeAsOptional("Keys_GetCoreDatabase");
@@ -115,4 +115,3 @@ public void __pl_keys_core_SetNTVOptional()
 	MarkNativeAsOptional("Keys_UnregKey");
 }
 #endif
->>>>>>> 675f293e4fe580b3b4c18caaaad9f9fc6415d20c
