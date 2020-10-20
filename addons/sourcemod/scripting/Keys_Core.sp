@@ -58,6 +58,23 @@ public OnPluginStart()
 
 	RegAdminCmds();
 
+	g_hKeysInProcessing = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
+
+	// init datapos
+	new Handle:hPack = CreateDataPack();
+	DP_Plugin = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnValidateCallback = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnUseCallback = GetPackPosition(hPack);
+
+	WritePackCell(hPack, 0);
+	DP_OnPrintCallback = GetPackPosition(hPack);
+
+	CloseHandle(hPack);
+
 	Connect_DB();
 }
 
@@ -329,7 +346,6 @@ public OnClientDisconnect(iClient)
 {
 	g_iAttempts[iClient] = 0;
 	g_bIsBlocked[iClient] = false;
-	g_bIsProcessing[iClient] = false;
 }
 
 public OnClientPostAdminCheck(iClient)
