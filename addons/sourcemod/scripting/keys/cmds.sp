@@ -57,7 +57,9 @@ public Action:UseKey_CMD(iClient, iArgs)
 				g_bIsBlocked[iClient] = false;
 				g_iAttempts[iClient] = 0;
 			}
-		} else if (g_bIsProcessing[iClient]) {
+		}
+		else if (g_bIsProcessing[iClient])
+		{
 			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
 			return Plugin_Handled;
 		}
@@ -70,6 +72,12 @@ public Action:UseKey_CMD(iClient, iArgs)
 
 		decl String:sKey[KEYS_MAX_LENGTH], String:sQuery[512];
 		GetCmdArg(1, SZF(sKey));
+
+		if (FindStringInArray(g_hProcessingKeysArray, sKey) != -1)
+		{
+			UTIL_ReplyToCommand(iClient, CmdReplySource, "%t%t", "ERROR", "ERROR_PROCESSING");
+			return Plugin_Handled;
+		}
 
 		if(!UTIL_ValidateKey(sKey, strlen(sKey), SZF(sQuery)))
 		{
@@ -94,8 +102,11 @@ public Action:UseKey_CMD(iClient, iArgs)
 			return Plugin_Handled;
 		}
 
+		PushArrayString(g_hProcessingKeysArray, sKey);
+
 		decl Handle:hDP, String:sAuth[32];
 		hDP = CreateDataPack();
+		WritePackString(hDP, sKey);
 		WritePackCell(hDP, UID(iClient));
 		WritePackCell(hDP, CmdReplySource);
 
@@ -127,7 +138,16 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 {
 	ResetPack(hDP);
 
-	new iClient = CID(ReadPackCell(hDP));
+	decl String:sKey[KEYS_MAX_LENGTH], iClient;
+	ReadPackString(hDP, SZF(sKey));
+
+	iClient = FindStringInArray(g_hProcessingKeysArray, sKey);
+	if (iClient != -1)
+	{
+		RemoveFromArray(g_hProcessingKeysArray, iClient);
+	}
+
+	iClient = CID(ReadPackCell(hDP));
 	g_bIsProcessing[iClient] = false;
 
 	if (hResult == INVALID_HANDLE || sDBError[0])
@@ -148,7 +168,7 @@ public SQL_Callback_UseKey(Handle:hOwner, Handle:hResult, const String:sDBError[
 			SQL_FetchString(hResult, 1, SZF(sKeyType));
 			if(GetTrieValue(g_hKeysTrie, sKeyType, hDataPack))
 			{
-				decl Handle:hPlugin, Function:fUseCallback, Handle:hParamsArr, String:sKey[KEYS_MAX_LENGTH], String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i, bool:bResult;
+				decl Handle:hPlugin, Function:fUseCallback, Handle:hParamsArr, String:sParam[KEYS_MAX_LENGTH], String:sError[256], iExpires, iUses, i, bool:bResult;
 				SQL_FetchString(hResult, 0, SZF(sKey));
 
 				iExpires = SQL_FetchInt(hResult, 2);

@@ -27,6 +27,7 @@ public OnPluginStart()
 
 	g_hKeysTrie = CreateTrie();
 	g_hKeysArray = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
+	g_hProcessingKeysArray = CreateArray(ByteCountToCells(KEYS_MAX_LENGTH));
 
 	new Handle:hCvar = CreateConVar("key_length", "32", "Длина генерируемого ключа (8-64)", _, true, 8.0, true, 64.0);
 	HookConVarChange(hCvar, OnKeyLengthChange);
@@ -214,6 +215,7 @@ Notify_Started()
 
 public OnConfigsExecuted()
 {
+	ClearArray(g_hProcessingKeysArray);
 	if(g_bIsStarted)
 	{
 		DeleteExpiredKeys();

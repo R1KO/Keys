@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
-#include <keys_core>
+#include <keys_core_old>
 #include <vip_core>
 
 public Plugin:myinfo =
@@ -215,14 +215,14 @@ public bool:OnKeyUse(iClient, const String:sKeyType[], Handle:hParamsArr, String
 
 		if(iClientID == -1)
 		{
-			VIP_RemoveClientVIP(iClient, false, false);
+			VIP_RemoveClientVIP2(0, iClient, false, false);
 		}
 
 		decl String:sTime[64], iTime;
 		GetArrayString(hParamsArr, 1, sTime, sizeof(sTime));
 		iTime = StringToInt(sTime);
 		#if USE_VIP_V3 == 1
-		VIP_SetClientVIP(0, iClient, iTime, sParam, true);
+		VIP_GiveClientVIP(0, iClient, iTime, sParam, true);
 		#else
 		VIP_SetClientVIP(iClient, iTime, AUTH_STEAM, sParam, true);
 		#endif

@@ -19,6 +19,7 @@ new bool:g_bIsBlocked[MAXPLAYERS+1],
 
 new Handle:g_hKeysTrie;
 new Handle:g_hKeysArray;
+new Handle:g_hProcessingKeysArray;
 
 new g_iServerID = -1;
 
